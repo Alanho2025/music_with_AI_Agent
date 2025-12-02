@@ -1,24 +1,31 @@
+// index.js
 const express = require("express");
 const cors = require("cors");
+const { verifyToken } = require("./middlewares/auth");
+const { attachUser } = require("./middlewares/user");
 
-const groupRoutes = require("./routes/groups");
-const idolRoutes = require("./routes/idols");
+const groupsRouter = require("./routes/groups");
+const idolsRouter = require("./routes/idols");
+const playlistsRouter = require("./routes/playlists");
 
 const app = express();
-app.use(cors({
-  origin: "http://localhost:3000", 
-  credentials: true}
-));
+
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
-// routes
-app.use("/api/groups", groupRoutes);
-app.use("/api/idols", idolRoutes);
+// public routes
+app.use("/api/groups", groupsRouter);
+app.use("/api/idols", idolsRouter);
 
-app.get("/", (req, res) => {
-  res.send("K-pop API running");
-});
+// protected routes (需要登入)
+app.use("/api/playlists", verifyToken, attachUser, playlistsRouter);
 
-app.listen(8080, () => {
-  console.log("Server running on http://localhost:8080");
+const PORT = 8080;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });

@@ -1,6 +1,9 @@
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 
 function Sidebar() {
+    const { isAuthenticated, profile, login, logout } = useAuth();
+
     const baseItemClasses =
         "flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition";
     const inactiveClasses =
@@ -9,7 +12,6 @@ function Sidebar() {
 
     return (
         <aside className="w-60 bg-slate-950 border-l border-slate-800 px-4 py-6 flex flex-col gap-6">
-            {/* Logo / Title */}
             <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
                     K-pop Hub
@@ -19,7 +21,6 @@ function Sidebar() {
                 </p>
             </div>
 
-            {/* Navigation */}
             <nav className="flex flex-col gap-1">
                 <NavLink
                     to="/"
@@ -67,10 +68,27 @@ function Sidebar() {
                 </NavLink>
             </nav>
 
-            {/* 下面這區之後可以放 Keycloak 登入 / 登出 或其他資訊 */}
-            <div className="mt-auto text-xs text-slate-500 space-y-1">
-                <p>Auth: not connected yet</p>
-                <p>Next step: plug in Keycloak here.</p>
+            <div className="mt-auto border-t border-slate-800 pt-4 text-xs text-slate-300">
+                {isAuthenticated ? (
+                    <div className="space-y-2">
+                        <p className="text-slate-200 text-sm">
+                            Hi, {profile?.firstName || profile?.username || "Idol lover"}
+                        </p>
+                        <button
+                            onClick={logout}
+                            className="text-xs px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700"
+                        >
+                            Logout
+                        </button>
+                    </div>
+                ) : (
+                    <button
+                        onClick={login}
+                        className="text-xs px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700"
+                    >
+                        Login with Keycloak
+                    </button>
+                )}
             </div>
         </aside>
     );
