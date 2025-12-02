@@ -1,4 +1,4 @@
-// index.js
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { verifyToken } = require("./middlewares/auth");
@@ -6,7 +6,9 @@ const { attachUser } = require("./middlewares/user");
 
 const groupsRouter = require("./routes/groups");
 const idolsRouter = require("./routes/idols");
+const videosRouter = require("./routes/videos");
 const playlistsRouter = require("./routes/playlists");
+const adminVideosRouter = require("./routes/adminVideos"); 
 
 const app = express();
 
@@ -18,12 +20,19 @@ app.use(
 );
 app.use(express.json());
 
-// public routes
+// public
 app.use("/api/groups", groupsRouter);
 app.use("/api/idols", idolsRouter);
+app.use("/api/videos", videosRouter);
 
-// protected routes (需要登入)
+// protected
 app.use("/api/playlists", verifyToken, attachUser, playlistsRouter);
+app.use(
+  "/api/admin/videos",
+  verifyToken,
+  attachUser,
+  adminVideosRouter
+);
 
 const PORT = 8080;
 app.listen(PORT, () => {

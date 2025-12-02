@@ -66,6 +66,16 @@ function Sidebar() {
                     <span>🧑</span>
                     <span>My Page</span>
                 </NavLink>
+                <NavLink
+                    to="/admin/videos"
+                    className={({ isActive }) =>
+                        `${baseItemClasses} ${isActive ? activeClasses : inactiveClasses
+                        }`
+                    }
+                >
+                    <span></span>
+                    <span>AdminVideos</span>
+                </NavLink>
             </nav>
 
             <div className="mt-auto border-t border-slate-800 pt-4 text-xs text-slate-300">

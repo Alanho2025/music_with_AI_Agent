@@ -5,7 +5,7 @@ import Groups from "./pages/Groups";
 import Idols from "./pages/Idols";
 import Me from "./pages/Me";
 import Sidebar from "./components/Sidebar";
-
+import AdminVideos from "./pages/AdminVideos";
 function App() {
   return (
     <BrowserRouter>
@@ -17,6 +17,7 @@ function App() {
             <Route path="/groups" element={<Groups />} />
             <Route path="/idols" element={<Idols />} />
             <Route path="/me" element={<Me />} />
+            <Route path="/admin/videos" element={<AdminVideos />} />
           </Routes>
         </main>
 

@@ -28,10 +28,6 @@ function Home() {
                     <FeaturedIdolCard />
                 </div>
             </section>
-
-            <section className="mt-6">
-                <UpcomingPlaylist playlist={dummyPlaylist} />
-            </section>
         </>
     );
 }
