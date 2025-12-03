@@ -20,7 +20,6 @@ function App() {
             <Route path="/admin/videos" element={<AdminVideos />} />
           </Routes>
         </main>
-
         <Sidebar />
       </div>
     </BrowserRouter>
