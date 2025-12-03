@@ -67,3 +67,67 @@ Open source API
 3.	Cheerie – HTML parsing (npm install cheerie)
 4.	Keycloak – user login / auth
 <img width="468" height="273" alt="image" src="https://github.com/user-attachments/assets/a4e169d3-dfb7-4c77-828b-6105436d3db1" />
+
+
+MileStone:
+12/3:
+🚀 Project Milestones (as of 2025-12-03)
+This document summarises all completed milestones for the K-pop Music Hub project up to today.
+All screenshots shown in the repo correspond to the features listed below.
+1. Authentication & User System
+Integrated Keycloak for secure login.
+Login flow fully functional across frontend and backend.
+Session and token handling implemented in React.
+Basic separation between general users and admin routes (sidebar now shows Admin section only when logged in).
+Pending: role-based access (ADMIN / USER) and user registration.
+2. Admin – Video Importing & Management
+✔ YouTube Import Pipeline
+Paste a YouTube URL → fetch metadata via API → auto-fill form fields.
+Metadata includes title, thumbnail, category, tags, publish date, mood/style/era, view count, and more.
+“Save video” writes finalised metadata into PostgreSQL.
+✔ Existing Videos Dashboard
+Search existing songs by title, group, or YouTube ID.
+Alphabet filter (A–Z).
+Group tags for quick filtering.
+Edit and delete functions (live DB updates).
+Fully responsive two-panel layout.
+3. Admin – Group / Idol / Album Data Import
+✔ URL Data Scraping Page
+Supports importing group data directly from external profile pages.
+Auto-parses group metadata (name, Korean name, gender, debut date, company, fanclub, original members).
+Manual override and editing supported.
+✔ Dynamic Form Builder
+Add idols manually after scraping.
+Add albums dynamically.
+“Save to Database” writes a complete group + idols + albums bundle into PostgreSQL.
+✔ CSV Import (Initial UI)
+CSV import UI ready on the right pane (backend parsing coming next).
+4. Public Pages (User-facing UI)
+✔ Groups Page
+Displays all K-pop groups saved in the database.
+Shows debut date and links into potential future detail pages.
+✔ Idols Page
+Shows all idols, joined with their groups.
+Clean card layout with positions and roles.
+5. Home Page – Music Player Integration
+Fully functional YouTube embedded player with previous/next navigation.
+Tracks pulled from real database content.
+“Coming up next” queue shown below the video.
+Featured Idol widget shows randomised idol data from PostgreSQL.
+6. General Site Structure
+Fully working sidebar navigation.
+Automatic role-aware menu (Admin Videos, Import Data).
+Logout UI updated with logged-in username.
+Global dark UI theme consistently applied across all pages.
+⭐ Overall Progress Summary
+The project has moved from a basic prototype into a functional admin CMS + early user-facing player:
+Authentication backbone complete
+Video scraping & import pipeline working
+Group / Idol / Album management implemented
+Database integration stable
+Working music playback with embedded YouTube player
+Browsable groups and idols on the frontend
+This sets a strong foundation for upcoming MVP features such as playlist support, auto-play, role-based access, image management, album store, and full user-facing Songs page.
+
+Common mistakes I make:
+1. forget the ports between front-end and backend are different, fetch may not work if use relative link.
