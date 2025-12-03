@@ -1,15 +1,15 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const { verifyToken } = require("./middlewares/auth");
-const { attachUser } = require("./middlewares/user");
+const { verifyToken } = require("./src/middlewares/auth");
+const { attachUser } = require("./src/middlewares/user");
 
-const groupsRouter = require("./routes/groups");
-const idolsRouter = require("./routes/idols");
-const videosRouter = require("./routes/videos");
-const playlistsRouter = require("./routes/playlists");
-const adminVideosRouter = require("./routes/adminVideos"); 
-
+const groupsRouter = require("./src/routes/groups");
+const idolsRouter = require("./src/routes/idols");
+const videosRouter = require("./src/routes/videos");
+const playlistsRouter = require("./src/routes/playlists");
+const adminVideosRouter = require("./src/routes/adminVideos"); 
+const importRoutes = require("./src/routes/importRoutes");
 const app = express();
 
 app.use(
@@ -19,7 +19,10 @@ app.use(
   })
 );
 app.use(express.json());
-
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
 // public
 app.use("/api/groups", groupsRouter);
 app.use("/api/idols", idolsRouter);
@@ -33,6 +36,7 @@ app.use(
   attachUser,
   adminVideosRouter
 );
+app.use("/api/import", importRoutes);
 
 const PORT = 8080;
 app.listen(PORT, () => {

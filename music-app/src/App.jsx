@@ -6,6 +6,7 @@ import Idols from "./pages/Idols";
 import Me from "./pages/Me";
 import Sidebar from "./components/Sidebar";
 import AdminVideos from "./pages/AdminVideos";
+import AdminHtmlImport from "./pages/AdminHtmlImport";
 function App() {
   return (
     <BrowserRouter>
@@ -18,6 +19,7 @@ function App() {
             <Route path="/idols" element={<Idols />} />
             <Route path="/me" element={<Me />} />
             <Route path="/admin/videos" element={<AdminVideos />} />
+            <Route path="/admin/import" element={<AdminHtmlImport />} />
           </Routes>
         </main>
         <Sidebar />
