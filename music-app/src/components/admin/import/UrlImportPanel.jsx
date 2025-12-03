@@ -57,10 +57,11 @@ function UrlImportPanel() {
 
         try {
             const res = await axios.post(
-                "http://localhost:8080/api/import/url",
-                { url }
+                "http://localhost:8080/api/import/group-llm",
+                { sourceUrl: url }   
             );
 
+            
             const parsed = res.data.parsed || res.data;
 
             const g = parsed.group || {};
@@ -84,12 +85,14 @@ function UrlImportPanel() {
             );
         } catch (err) {
             console.error("[UrlImportPanel] import error:", err);
+
             setError(
+                err.response?.data?.detail ||
                 err.response?.data?.error ||
                 err.message ||
                 "Failed to scrape URL."
             );
-        } finally {
+          } finally {
             setLoading(false);
         }
     }

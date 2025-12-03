@@ -3,7 +3,6 @@ const express = require("express");
 const cors = require("cors");
 const { verifyToken } = require("./src/middlewares/auth");
 const { attachUser } = require("./src/middlewares/user");
-
 const groupsRouter = require("./src/routes/groups");
 const idolsRouter = require("./src/routes/idols");
 const videosRouter = require("./src/routes/videos");
@@ -37,7 +36,6 @@ app.use(
   adminVideosRouter
 );
 app.use("/api/import", importRoutes);
-
 const PORT = 8080;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
