@@ -7,6 +7,9 @@ import Me from "./pages/Me";
 import Sidebar from "./components/Sidebar";
 import AdminVideos from "./pages/AdminVideos";
 import AdminHtmlImport from "./pages/AdminHtmlImport";
+import MusicPlayer from "./pages/MusicPlayer";
+import Albums from "./pages/Albums";
+import Playlist from "./pages/Playlist";
 function App() {
   return (
     <BrowserRouter>
@@ -17,6 +20,9 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/groups" element={<Groups />} />
             <Route path="/idols" element={<Idols />} />
+            <Route path="/music-player" element={<MusicPlayer />} />
+            <Route path="/albums" element={<Albums />} />
+            <Route path="/playlists" element={<Playlist />} />
             <Route path="/me" element={<Me />} />
             <Route path="/admin/videos" element={<AdminVideos />} />
             <Route path="/admin/import" element={<AdminHtmlImport />} />

@@ -8,22 +8,29 @@ router.get("/", async (req, res) => {
     try {
         const { group_id } = req.query;
 
-        let result;
+        const params = [];
+        let whereClause = "";
+
         if (group_id) {
-            result = await db.query(
-                `SELECT v.*
-         FROM videos v
-         WHERE v.group_id = $1
-         ORDER BY v.id`,
-                [group_id]
-            );
-        } else {
-            result = await db.query(
-                `SELECT v.*
-         FROM videos v
-         ORDER BY v.id`
-            );
+            whereClause = "WHERE v.group_id = $1";
+            params.push(group_id);
         }
+
+        const result = await db.query(
+            `
+            SELECT
+                v.*,
+                g.name AS group_name
+            FROM videos v
+            LEFT JOIN groups g ON v.group_id = g.id
+            ${whereClause}
+            ORDER BY
+                COALESCE(g.name, '') ASC,
+                v.title ASC,
+                v.id ASC
+            `,
+            params
+        );
 
         res.json(result.rows);
     } catch (err) {
@@ -32,12 +39,20 @@ router.get("/", async (req, res) => {
     }
 });
 
-// (選配) 單一影片
+// 單一影片：一樣把 group_name 帶回去
 router.get("/:id", async (req, res) => {
     try {
         const { id } = req.params;
+
         const result = await db.query(
-            "SELECT * FROM videos WHERE id = $1",
+            `
+            SELECT
+                v.*,
+                g.name AS group_name
+            FROM videos v
+            LEFT JOIN groups g ON v.group_id = g.id
+            WHERE v.id = $1
+            `,
             [id]
         );
 

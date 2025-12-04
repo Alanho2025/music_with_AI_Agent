@@ -6,7 +6,7 @@ function Me() {
     if (!isAuthenticated) {
         return (
             <div className="flex flex-col gap-4">
-                <h1 className="text-2xl font-bold tracking-tight">My Page</h1>
+                <h1 className="text-2xl font-bold tracking-tight">Personal Dashboard</h1>
                 <p className="text-sm text-slate-400">
                     You need to log in to see your personalized page.
                 </p>

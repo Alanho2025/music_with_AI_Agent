@@ -38,7 +38,6 @@ function Sidebar() {
                     <span>👥</span>
                     <span>Groups</span>
                 </NavLink>
-
                 <NavLink
                     to="/idols"
                     className={({ isActive }) => makeClasses(isActive)}
@@ -46,13 +45,26 @@ function Sidebar() {
                     <span>🌟</span>
                     <span>Idols</span>
                 </NavLink>
+                <NavLink to="/music-player" className={({ isActive }) => makeClasses(isActive)}>
+                    <span>🎧</span>
+                    <span>Music Player</span>
+                </NavLink>
 
+                <NavLink to="/albums" className={({ isActive }) => makeClasses(isActive)}>
+                    <span>💿</span>
+                    <span>Albums</span>
+                </NavLink>
+
+                <NavLink to="/playlists" className={({ isActive }) => makeClasses(isActive)}>
+                    <span>🎵</span>
+                    <span>Playlists</span>
+                </NavLink>
                 <NavLink
                     to="/me"
                     className={({ isActive }) => makeClasses(isActive)}
                 >
                     <span>🧑</span>
-                    <span>My Page</span>
+                    <span>Personal Dashboard</span>
                 </NavLink>
             </nav>
 

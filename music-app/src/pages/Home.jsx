@@ -1,14 +1,8 @@
-import Player from "../components/Player";
+// src/pages/Home.jsx
 import FeaturedIdolCard from "../components/FeaturedIdolCard";
-import UpcomingPlaylist from "../components/UpcomingPlaylist";
+import { Link } from "react-router-dom";
 
 function Home() {
-    const dummyPlaylist = [
-        { id: 1, title: "NewJeans - Super Shy", group: "NewJeans" },
-        { id: 2, title: "IVE - I AM", group: "IVE" },
-        { id: 3, title: "LE SSERAFIM - UNFORGIVEN", group: "LE SSERAFIM" },
-    ];
-
     return (
         <>
             <header>
@@ -21,8 +15,17 @@ function Home() {
             </header>
 
             <section className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="lg:col-span-2">
-                    <Player />
+                <div className="lg:col-span-2 flex flex-col gap-3">
+                    <p className="text-sm text-slate-300">
+                        Go to the{" "}
+                        <Link
+                            to="/music-player"
+                            className="text-pink-400 hover:underline"
+                        >
+                            Music Player
+                        </Link>{" "}
+                        page to browse all songs and use the full player.
+                    </p>
                 </div>
                 <div className="lg:col-span-1">
                     <FeaturedIdolCard />
