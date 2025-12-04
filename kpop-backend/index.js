@@ -8,6 +8,7 @@ const idolsRouter = require("./src/routes/idols");
 const videosRouter = require("./src/routes/videos");
 const playlistsRouter = require("./src/routes/playlists");
 const adminVideosRouter = require("./src/routes/adminVideos"); 
+const adminIdolsRouter = require("./src/routes/adminIdols");
 const importRoutes = require("./src/routes/importRoutes");
 const app = express();
 
@@ -34,6 +35,12 @@ app.use(
   verifyToken,
   attachUser,
   adminVideosRouter
+);
+app.use(
+  "/api/admin/idols",
+  verifyToken,
+  attachUser,
+  adminIdolsRouter
 );
 app.use("/api/import", importRoutes);
 const PORT = 8080;

@@ -57,7 +57,7 @@ function Sidebar() {
 
                 <NavLink to="/playlists" className={({ isActive }) => makeClasses(isActive)}>
                     <span>🎵</span>
-                    <span>Playlists</span>
+                    <span>Custom Playlists</span>
                 </NavLink>
                 <NavLink
                     to="/me"
@@ -89,6 +89,13 @@ function Sidebar() {
                     >
                         <span>📚</span>
                         <span>Import data</span>
+                    </NavLink>
+                    <NavLink
+                        to="/admin/idols"
+                        className={({ isActive }) => makeClasses(isActive)}
+                    >
+                        <span>🌟</span>
+                        <span>Edit idols data</span>
                     </NavLink>
                 </div>
             )}

@@ -6,6 +6,7 @@ import Idols from "./pages/Idols";
 import Me from "./pages/Me";
 import Sidebar from "./components/Sidebar";
 import AdminVideos from "./pages/AdminVideos";
+import AdminIdols from "./pages/AdminIdols";
 import AdminHtmlImport from "./pages/AdminHtmlImport";
 import MusicPlayer from "./pages/MusicPlayer";
 import Albums from "./pages/Albums";
@@ -25,6 +26,7 @@ function App() {
             <Route path="/playlists" element={<Playlist />} />
             <Route path="/me" element={<Me />} />
             <Route path="/admin/videos" element={<AdminVideos />} />
+            <Route path="/admin/idols" element={<AdminIdols />} />
             <Route path="/admin/import" element={<AdminHtmlImport />} />
           </Routes>
         </main>
