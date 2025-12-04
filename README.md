@@ -1,133 +1,166 @@
-Project planning
-
-Client - React Web App User UI Browse idols and groups Play music videos using a custom YouTube player View a personalized feed based on subscribed idols Like and comment on videos and posts Admin UI Search idols or paste external URLs to trigger data sync Create and edit event posts Review AI processed data before saving it to the database
-
-Backend - Node.js / Express REST API Serves data to the React client Handles CRUD for idols, groups, videos, events, subscriptions, feedback Validates requests and checks permissions Auth module Manages login state with JWT or sessions Protects private routes and admin endpoints Data Pipeline (ETL) Imports the seed dataset from Kaggle into SQL Fetches idol and event data from external sources based on user actions or scheduled jobs Works together with the AI service to normalize raw data AI Agent Service Wraps the LLM API Converts messy external data into clean, structured objects For example: consistent idol profile fields or clean event summaries Writes the validated result back to the SQL database Background Jobs Periodically checks for new content for subscribed idols Triggers sync jobs for videos and events Can log job results for monitoring
-
-SQL Database Suggested tables: users Stores user accounts idols, groups Core K-pop entities Seeded from Kaggle, then enriched by sync jobs videos YouTube videos linked to idols or groups events Event posts with time, place, link, and AI generated summary subscriptions Which users follow which idols feedback Likes and comments on videos and posts activity_log View and play history Drives dashboards and future recommendations
-
-External Data Sources Kaggle CSV Initial seed data for idols and groups YouTube Data API Source for public music videos for the player Idol info sites (dbkpop, Kprofiles etc.) Extra idol and group metadata Parsed and normalized by the AI service Event pages (Eventbrite and other ticket sites) Single event URLs as input Used to build event posts with AI summaries LLM API Provides the AI agent with summarization and field mapping abilities
-Potential Risk and solustion:
-
-Technical Risks 
-Risk 1.1 The project has too many moving parts and may increase technical debt. Solution Split the work into clear milestones. Make each milestone runnable and demo ready. 
-Risk 1.2 YouTube API quota limits may block large data requests. Solution Use caching. Fetch new video data once per day. Store all metadata in SQL. 
-Risk 1.3 The custom music player may become too complex. Solution Start with basic play and pause. Add queue playback later.
-Data Risks 
-
-Risk 2.1 The Kaggle dataset is old and incomplete. Solution Use Kaggle as seed data. Add an admin panel to import new idol data from external sites. 
-Risk 2.2 External websites may change their HTML structure and break scraping. Solution Separate scraping and data mapping. Use AI to normalize fields. Update only selectors when needed. 
-Risk 2.3 Event APIs like Eventbrite have limited public access. Solution Use single event URLs. Extract data from the page. Let AI produce a clean summary.
-Legal and API Risks 
-
-Risk 3.1 YouTube playback may violate platform rules. Solution Use the official embed API. Keep the YouTube watermark. Do not download videos.
-Risk 3.2 Using idol photos may cause copyright issues. Solution Use YouTube thumbnails or your own images. Avoid crawling commercial photo sites.
-
-System Design Risks 
-
-Risk 4.1 The data update pipeline may become unstable. Solution Split the pipeline into three layers: Fetcher, AI Normalizer, SQL Writer. 
-Risk 4.2 Backend APIs may become inconsistent and hard to maintain. Solution Define all endpoints in a clear API contract or Swagger file. 
-Risk 4.3 A full recommendation system may slow the project. Solution Start with simple rules: subscribed idols, recent videos, and basic history.
-
-Execution Risks 
-
-Risk 5.1 Trying to build all features at once may delay completion. Solution Follow milestone-based development: Auth → Database → Player → Subscriptions → Events → AI. 
-Risk 5.2 Deployment on AWS may take too much time. Solution Develop locally first. Deploy only after MVP. Use simple hosting options like S3, CloudFront, or Render.
-
-AI Agent Layer (Langflow)
-The project uses Langflow as a low-code AI agent layer.
-
-Langflow is an open source visual framework for building LLM agents and workflows.
-It lets me design flows for idol data normalization and event summarization without writing complex AI code.
-Each Langflow flow is deployed as a REST API endpoint.
-The Node.js backend calls these endpoints and stores the cleaned JSON in PostgreSQL.
-Planned flows:
-
-Idol Normalizer Flow
-
-Input: raw text or HTML extracted from K-pop info sites
-Output: structured idol profile (name, group, debut year, company, tags, sources)
+K-pop Music Hub
+A full stack K-pop content platform with an admin CMS, AI powered data pipeline, and a user focused music player.
+This project supports both casual fans and admins who want to maintain an accurate K-pop database. The system integrates external data sources, AI based normalization, clean SQL storage, and a React interface for browsing groups, idols, and music videos.
+1. Project Overview
+The platform provides two main user experiences.
+Client – React Web App
+Browse idols, groups, albums, and videos
+Play music videos through a custom YouTube embedded player
+Receive personalized content based on subscriptions
+View featured idols, trending tracks, and upcoming content
+Like or comment on posts in future versions
+Admin – Data Management Console
+Import idols, groups, and albums by pasting external profile URLs
+Import music videos using YouTube links
+Validate and edit AI processed metadata before saving
+Manage events with AI generated summaries
+Search, filter, edit, and delete existing entries
+2. System Architecture
+Frontend
+React + Vite + Tailwind CSS
+Component based UI for groups, idols, and video playback
+Role aware navigation menu (user vs admin)
+Fully responsive layout
+Backend
+Node.js + Express REST API
+Serves all data to frontend
+Handles CRUD for:
+groups
+idols
+videos
+events
+subscriptions
+feedback
+Validates requests and checks permissions
+Integrates with AI and external APIs
+Includes a background job layer for periodic sync tasks
+Authentication
+Keycloak
+Login state handled on both client and server
+Protects admin routes
+Future plan: role based access (USER / ADMIN)
+3. AI Agent Layer (Langflow)
+The project uses Langflow as a low code AI workflow engine.
+Each flow is deployed as a REST endpoint. The Node backend calls these flows and writes the cleaned results into PostgreSQL.
+Idol Normalization Flow
+Input: raw text or HTML from K-pop profile sites
+Output: structured profile
+idol name
+group
+debut year
+tags
+company
+cleaned metadata
 Event Summary Flow
-
-Input: raw content from event pages
-Output: cleaned event object (title, datetime, venue, source link, short summary)
-This setup keeps the AI logic outside the core app and reduces the amount of custom code in the backend while staying fully open source.
-
-Tech Stack (cost friendly and open source)
-•	Frontend: React + Vite + Tailwind CSS
-•	Backend: Node.js + Express
-•	Database: PostgreSQL (local Docker, future ready for AWS RDS)
-•	ORM / Migrations: Prisma or Knex.js
-•	Hosting: local for backend and DB, free static hosting (Netlify / Vercel) for frontend
-•	Optional AI: pluggable LLM service, disabled by default to keep the project free, langflow
-
-Open source API
-1.	React-youtube (npm install react-youtube)
-2.	Langflow 
-3.	Cheerie – HTML parsing (npm install cheerie)
-4.	Keycloak – user login / auth
-<img width="468" height="273" alt="image" src="https://github.com/user-attachments/assets/a4e169d3-dfb7-4c77-828b-6105436d3db1" />
-
-
-MileStone:
-12/3:
-🚀 Project Milestones (as of 2025-12-03)
-This document summarises all completed milestones for the K-pop Music Hub project up to today.
-All screenshots shown in the repo correspond to the features listed below.
-1. Authentication & User System
-Integrated Keycloak for secure login.
-Login flow fully functional across frontend and backend.
-Session and token handling implemented in React.
-Basic separation between general users and admin routes (sidebar now shows Admin section only when logged in).
-Pending: role-based access (ADMIN / USER) and user registration.
-2. Admin – Video Importing & Management
-✔ YouTube Import Pipeline
-Paste a YouTube URL → fetch metadata via API → auto-fill form fields.
-Metadata includes title, thumbnail, category, tags, publish date, mood/style/era, view count, and more.
-“Save video” writes finalised metadata into PostgreSQL.
-✔ Existing Videos Dashboard
-Search existing songs by title, group, or YouTube ID.
-Alphabet filter (A–Z).
-Group tags for quick filtering.
-Edit and delete functions (live DB updates).
-Fully responsive two-panel layout.
-3. Admin – Group / Idol / Album Data Import
-✔ URL Data Scraping Page
-Supports importing group data directly from external profile pages.
-Auto-parses group metadata (name, Korean name, gender, debut date, company, fanclub, original members).
-Manual override and editing supported.
-✔ Dynamic Form Builder
-Add idols manually after scraping.
-Add albums dynamically.
-“Save to Database” writes a complete group + idols + albums bundle into PostgreSQL.
-✔ CSV Import (Initial UI)
-CSV import UI ready on the right pane (backend parsing coming next).
-4. Public Pages (User-facing UI)
-✔ Groups Page
-Displays all K-pop groups saved in the database.
-Shows debut date and links into potential future detail pages.
-✔ Idols Page
-Shows all idols, joined with their groups.
-Clean card layout with positions and roles.
-5. Home Page – Music Player Integration
-Fully functional YouTube embedded player with previous/next navigation.
-Tracks pulled from real database content.
-“Coming up next” queue shown below the video.
-Featured Idol widget shows randomised idol data from PostgreSQL.
-6. General Site Structure
-Fully working sidebar navigation.
-Automatic role-aware menu (Admin Videos, Import Data).
-Logout UI updated with logged-in username.
-Global dark UI theme consistently applied across all pages.
-⭐ Overall Progress Summary
-The project has moved from a basic prototype into a functional admin CMS + early user-facing player:
-Authentication backbone complete
-Video scraping & import pipeline working
-Group / Idol / Album management implemented
-Database integration stable
-Working music playback with embedded YouTube player
-Browsable groups and idols on the frontend
-This sets a strong foundation for upcoming MVP features such as playlist support, auto-play, role-based access, image management, album store, and full user-facing Songs page.
-
-Common mistakes I make:
-1. forget the ports between front-end and backend are different, fetch may not work if use relative link.
+Input: raw event page content
+Output: structured event object
+title
+datetime
+venue
+summary
+official link
+This approach keeps AI logic decoupled. Backend stays clean and easy to maintain.
+4. Data Pipeline (ETL)
+The platform uses a three step pipeline:
+1. Fetcher
+Downloads raw data from Kaggle CSV, K-pop sites, Eventbrite pages, YouTube Data API
+2. AI Normalizer
+Langflow cleans and standardizes all fields
+Removes inconsistencies in external data sources
+3. SQL Writer
+Saves final data into PostgreSQL
+Ensures referential integrity across groups, idols, albums, and videos
+Background jobs can refresh subscribed idols and new video releases.
+5. Database Schema (PostgreSQL)
+Recommended tables:
+Table	Purpose
+users	user accounts (Keycloak ID, profile)
+groups	core group info
+idols	linked to groups
+albums	linked to groups and idols
+videos	YouTube data + metadata
+events	event schedule, venue, link, AI summary
+subscriptions	user to idol relationship
+feedback	likes and comments
+activity_log	view history and analytics
+The schema is optimized for fan interactions, search, and recommendation features.
+6. External Data Sources
+Kaggle CSV – initial seed dataset
+YouTube Data API – public video metadata
+K-profiles / dbkpop – additional group and idol metadata
+Eventbrite and similar sites – event details
+LLM API / Langflow – summarizes and maps fields
+This hybrid pipeline enriches the data while keeping the system cost friendly.
+7. Technology Stack
+Frontend: React, Vite, Tailwind CSS
+Backend: Node.js, Express
+Database: PostgreSQL (local Docker, AWS ready)
+ORM: Prisma or Knex
+Auth: Keycloak
+AI: Langflow (open source, optional)
+YouTube Player: react-youtube
+HTML parsing: Cheerio
+Hosting:
+Frontend: Netlify or Vercel
+Backend: local or Render
+DB: Docker or RDS
+All components are open source or free to run.
+8. Milestones (as of 2025-12-03)
+1. Authentication
+Keycloak login integrated
+Token handling working
+Sidebar adapts to user role
+Admin section visible only when logged in
+2. Admin – Video Importing
+Paste YouTube URL to auto fetch metadata
+Form auto filled with extracted info
+Save to SQL fully working
+Video dashboard supports search, A-Z filter, and group filter
+Edit and delete functions complete
+3. Admin – Group / Idol / Album Import
+URL scraping page implemented
+Extracts group metadata from profile sites
+Add idols and albums dynamically
+Save bundle into PostgreSQL
+CSV import UI prepared
+4. Public UI
+Groups page fully implemented
+Idols page connected to live DB
+Clean card layouts
+5. Music Player Integration
+Embedded YouTube player with next and previous buttons
+Queue displayed under current video
+Featured idol widget pulling live data
+6. Global Structure
+Sidebar navigation complete
+Dark theme applied across UI
+Logout shows username
+Admin routes organized
+Progress Summary
+The system now functions as a working CMS plus early user platform. The foundation supports playlist features, recommendations, richer idol pages, and advanced event management.
+9. Risks and Mitigations
+Technical
+Too many moving parts → split into small milestones
+YouTube quota limits → cache and store metadata in SQL
+Complex music player → start simple and iterate
+Data
+Kaggle dataset outdated → use only as seed
+HTML structure changes → keep scrapers independent from normalizers
+Limited official event APIs → rely on URL parsing plus AI summarization
+Legal
+YouTube playback compliance → use official embed API
+Idol photo copyright → use thumbnails or approved images
+System
+ETL pipeline instability → separate fetch, normalize, write layers
+API inconsistency → maintain clear API contracts
+Heavy recommendations → start with simple rules
+Execution
+Building too much at once → milestone based workflow
+Complex deployment → build locally first, deploy later
+10. Common Mistakes and Notes
+Mixing ports between local backend and frontend
+Using relative fetch URLs that fail due to different servers
+Forgetting to protect environment variables or API keys
+Overwriting DB rows due to missing unique constraints
+11. Status
+The project is stable, modular, and ready for the next round of features.
