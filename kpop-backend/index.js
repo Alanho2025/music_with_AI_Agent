@@ -4,12 +4,14 @@ const cors = require("cors");
 const { verifyToken } = require("./src/middlewares/auth");
 const { attachUser } = require("./src/middlewares/user");
 const groupsRouter = require("./src/routes/groups");
+const albumRoutes = require("./src/routes/albums");
 const idolsRouter = require("./src/routes/idols");
 const videosRouter = require("./src/routes/videos");
 const playlistsRouter = require("./src/routes/playlists");
 const adminVideosRouter = require("./src/routes/adminVideos"); 
 const adminIdolsRouter = require("./src/routes/adminIdols");
 const importRoutes = require("./src/routes/importRoutes");
+const adminAlbumsRouter = require("./src/routes/adminAlbums");
 const app = express();
 
 app.use(
@@ -25,6 +27,7 @@ app.use((req, res, next) => {
 });
 // public
 app.use("/api/groups", groupsRouter);
+app.use("/api/albums", albumRoutes);
 app.use("/api/idols", idolsRouter);
 app.use("/api/videos", videosRouter);
 
@@ -41,6 +44,12 @@ app.use(
   verifyToken,
   attachUser,
   adminIdolsRouter
+);
+app.use(
+  "/api/admin/albums",
+  verifyToken,
+  attachUser,
+  adminAlbumsRouter
 );
 app.use("/api/import", importRoutes);
 const PORT = 8080;

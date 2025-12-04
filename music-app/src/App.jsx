@@ -1,13 +1,14 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
 import Home from "./pages/Home";
-import Groups from "./pages/Groups";
+import Groups from "./components/Groups";
+import GroupTimelinePage from "./pages/GroupTimelinePage";
 import Idols from "./pages/Idols";
 import Me from "./pages/Me";
 import Sidebar from "./components/Sidebar";
 import AdminVideos from "./pages/AdminVideos";
 import AdminIdols from "./pages/AdminIdols";
 import AdminHtmlImport from "./pages/AdminHtmlImport";
+import AdminAlbums from "./pages/AdminAlbums";
 import MusicPlayer from "./pages/MusicPlayer";
 import Albums from "./pages/Albums";
 import Playlist from "./pages/Playlist";
@@ -20,6 +21,8 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/groups" element={<Groups />} />
+            <Route path="/groups/:id" element={<GroupTimelinePage />} />
+            <Route path="/groupTimelinePage" element={<GroupTimelinePage />} />
             <Route path="/idols" element={<Idols />} />
             <Route path="/music-player" element={<MusicPlayer />} />
             <Route path="/albums" element={<Albums />} />
@@ -28,6 +31,7 @@ function App() {
             <Route path="/admin/videos" element={<AdminVideos />} />
             <Route path="/admin/idols" element={<AdminIdols />} />
             <Route path="/admin/import" element={<AdminHtmlImport />} />
+            <Route path="/admin/albums" element={<AdminAlbums />} />
           </Routes>
         </main>
         <Sidebar />

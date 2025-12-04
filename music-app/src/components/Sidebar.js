@@ -97,6 +97,13 @@ function Sidebar() {
                         <span>🌟</span>
                         <span>Edit idols data</span>
                     </NavLink>
+                    <NavLink
+                        to="/admin/albums"
+                        className={({ isActive }) => makeClasses(isActive)}
+                    >
+                        <span>🌟</span>
+                        <span>Edit album data</span>
+                    </NavLink>
                 </div>
             )}
 
