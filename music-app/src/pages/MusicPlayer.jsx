@@ -4,6 +4,8 @@ import api from "../api/client";
 import VideoFilters from "../components/music/VideoFilters";
 import VideoList from "../components/music/VideoList";
 import VideoPlayerPanel from "../components/music/VideoPlayerPanel";
+import { useSecureApi } from "../api/secureClient";
+import PlaylistFilters from "../components/music/PlaylistFilters";
 
 // 小 helper：嘗試從多個欄位抓 group 名稱
 function getGroupName(video) {
@@ -31,6 +33,12 @@ function MusicPlayer() {
     const [currentVideoId, setCurrentVideoId] = useState(null);
     const autoNextTimeoutRef = useRef(null);
 
+    // playlists
+    const secureApi = useSecureApi();
+    const [playlists, setPlaylists] = useState([]);
+    const [playlistFilter, setPlaylistFilter] = useState(null); // null = 不使用 playlist
+    const [playlistItems, setPlaylistItems] = useState([]);
+
     // 抓全部 videos
     useEffect(() => {
         async function fetchVideos() {
@@ -57,6 +65,61 @@ function MusicPlayer() {
         fetchVideos();
     }, []);
 
+    // 抓 playlists 清單
+    useEffect(() => {
+        async function loadPlaylists() {
+            try {
+                const res = await secureApi.get("/playlists");
+                setPlaylists(Array.isArray(res.data) ? res.data : []);
+            } catch (e) {
+                console.error("Failed to load playlists", e);
+            }
+        }
+        loadPlaylists();
+    }, [secureApi]);
+
+    // 點選 playlist tag
+    async function handlePlaylistSelect(id) {
+        // 再點一次同一個 playlist 就取消（回到全部歌曲）
+        if (playlistFilter === id) {
+            setPlaylistFilter(null);
+            setPlaylistItems([]);
+            return;
+        }
+
+        setPlaylistFilter(id);
+
+        if (!id) {
+            setPlaylistItems([]);
+            return;
+        }
+
+        try {
+            const res = await secureApi.get(`/playlists/${id}`);
+            const items = res.data.items || [];
+
+            const mapped = items.map((i) => ({
+                video_id: i.video_id,
+                video: {
+                    id: i.video_id,
+                    title: i.title,
+                    youtube_id: i.youtube_id,
+                    category: i.category,
+                    group_name: i.group_name,
+                    duration_seconds: i.duration_seconds,
+                },
+            }));
+
+            setPlaylistItems(mapped);
+
+            if (mapped.length > 0) {
+                setCurrentVideoId(mapped[0].video_id);
+            }
+        } catch (err) {
+            console.error("Failed to load playlist", err);
+        }
+    }
+
     // group 選項：用 helper 抓所有 group 名
     const groupOptions = useMemo(() => {
         const names = new Set();
@@ -67,8 +130,13 @@ function MusicPlayer() {
         return Array.from(names).sort();
     }, [videos]);
 
-    // 搜尋 + group filter + 排序
+    // 搜尋 + group filter + 排序 + playlist 模式
     const filteredVideos = useMemo(() => {
+        // ▶ 如果有選 playlist，就直接用 playlistItems
+        if (playlistFilter && playlistItems.length > 0) {
+            return playlistItems.map((i) => i.video);
+        }
+
         const term = searchTerm.trim().toLowerCase();
 
         const filtered = videos.filter((v) => {
@@ -112,7 +180,15 @@ function MusicPlayer() {
         });
 
         return sorted;
-    }, [videos, searchTerm, groupFilter, sortBy, sortDirection]);
+    }, [
+        videos,
+        searchTerm,
+        groupFilter,
+        sortBy,
+        sortDirection,
+        playlistFilter,
+        playlistItems,
+    ]);
 
     const currentVideo = useMemo(() => {
         if (!filteredVideos.length) return null;
@@ -209,6 +285,12 @@ function MusicPlayer() {
                                 prev === "asc" ? "desc" : "asc"
                             )
                         }
+                    />
+
+                    <PlaylistFilters
+                        playlists={playlists}
+                        playlistFilter={playlistFilter}
+                        onPlaylistChange={handlePlaylistSelect}
                     />
 
                     <VideoList

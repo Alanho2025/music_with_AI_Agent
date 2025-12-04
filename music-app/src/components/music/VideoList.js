@@ -1,7 +1,6 @@
 // src/components/music/VideoList.js
 import React from "react";
 
-// 和 MusicPlayer 一樣的 group 取得邏輯
 function getGroupName(video) {
     if (!video) return "";
     return (
@@ -19,6 +18,11 @@ function VideoList({
     error,
     currentVideoId,
     onSelectVideo,
+    // playlist 專用
+    enableDrag = false,
+    onDragStartVideo,
+    showAddButton = false,
+    onAddToPlaylist,
 }) {
     return (
         <div className="mt-2 flex-1 min-h-0 overflow-y-auto">
@@ -44,24 +48,47 @@ function VideoList({
 
                         return (
                             <li key={v.id}>
-                                <button
-                                    type="button"
-                                    onClick={() => onSelectVideo(v.id)}
-                                    className={`w-full text-left px-3 py-2 rounded-lg text-sm flex flex-col border ${isActive
+                                <div
+                                    className={`w-full px-3 py-2 rounded-lg text-sm flex items-center border ${isActive
                                             ? "bg-slate-800 border-pink-500 text-slate-50"
                                             : "bg-slate-950 border-slate-800 text-slate-200 hover:bg-slate-800/60"
                                         }`}
                                 >
-                                    <span className="font-medium">
-                                        {v.title || "Untitled"}
-                                    </span>
-                                    <span className="text-xs text-slate-400">
-                                        {groupName
-                                            ? `${groupName} · `
-                                            : ""}
-                                        {v.category || "video"}
-                                    </span>
-                                </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => onSelectVideo(v.id)}
+                                        className="flex-1 text-left flex flex-col"
+                                        draggable={enableDrag}
+                                        onDragStart={
+                                            enableDrag && onDragStartVideo
+                                                ? (e) =>
+                                                    onDragStartVideo(e, v.id)
+                                                : undefined
+                                        }
+                                    >
+                                        <span className="font-medium">
+                                            {v.title || "Untitled"}
+                                        </span>
+                                        <span className="text-xs text-slate-400">
+                                            {groupName
+                                                ? `${groupName} · `
+                                                : ""}
+                                            {v.category || "video"}
+                                        </span>
+                                    </button>
+
+                                    {showAddButton && onAddToPlaylist && (
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                onAddToPlaylist(v.id)
+                                            }
+                                            className="ml-2 text-xs px-2 py-1 rounded-md border border-slate-700 hover:bg-slate-800"
+                                        >
+                                            +
+                                        </button>
+                                    )}
+                                </div>
                             </li>
                         );
                     })}
