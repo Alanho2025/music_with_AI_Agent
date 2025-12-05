@@ -12,6 +12,7 @@ const adminVideosRouter = require("./src/routes/adminVideos");
 const adminIdolsRouter = require("./src/routes/adminIdols");
 const importRoutes = require("./src/routes/importRoutes");
 const adminAlbumsRouter = require("./src/routes/adminAlbums");
+const storeAlbumsRouter = require("./src/routes/storeAlbums");
 const app = express();
 
 app.use(
@@ -52,6 +53,7 @@ app.use(
   adminAlbumsRouter
 );
 app.use("/api/import", importRoutes);
+app.use("/api/store/albums", storeAlbumsRouter);
 const PORT = 8080;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

@@ -1,15 +1,36 @@
 // src/components/admin/AlbumList.jsx
 import React from "react";
 
-function AlbumList({ albums, selectedId, onSelect, search, onSearchChange }) {
+function AlbumList({
+    albums,
+    selectedId,
+    onSelect,
+    search,
+    onSearchChange,
+    onCreate,        
+}) {
     return (
         <div className="w-72 border-r border-slate-800 pr-3 flex flex-col gap-3">
+            {/* Header + New button */}
+            <div className="flex items-center gap-2">
+                <button
+                    type="button"
+                    onClick={onCreate}
+                    className="flex-1 rounded-lg bg-pink-500 hover:bg-pink-400 text-xs font-semibold text-white px-3 py-2"
+                >
+                    + New album
+                </button>
+            </div>
+
+            {/* Search */}
             <input
                 className="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-pink-500/60 focus:border-pink-500"
                 placeholder="Search albums..."
                 value={search}
                 onChange={(e) => onSearchChange(e.target.value)}
             />
+
+            {/* List */}
             <div className="flex-1 overflow-y-auto flex flex-col gap-2 mt-1">
                 {albums.map((album) => (
                     <button
@@ -28,7 +49,9 @@ function AlbumList({ albums, selectedId, onSelect, search, onSearchChange }) {
                         </p>
                         {album.release_date && (
                             <p className="text-[11px] text-slate-500">
-                                {new Date(album.release_date).toLocaleDateString("en-GB")}
+                                {new Date(album.release_date).toLocaleDateString(
+                                    "en-GB"
+                                )}
                             </p>
                         )}
                     </button>

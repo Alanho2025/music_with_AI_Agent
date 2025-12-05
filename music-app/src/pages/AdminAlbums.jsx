@@ -15,7 +15,7 @@ function AdminAlbums() {
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState(null);
 
-    // 1) 載入 album list
+    // load albums list
     useEffect(() => {
         let cancelled = false;
 
@@ -40,7 +40,7 @@ function AdminAlbums() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // 2) 載入單一 album detail
+    // load single album detail
     useEffect(() => {
         if (!selectedId) return;
         let cancelled = false;
@@ -66,7 +66,7 @@ function AdminAlbums() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedId]);
 
-    // 3) filter list
+    // filter list
     const filteredAlbums = useMemo(() => {
         const term = search.trim().toLowerCase();
         if (!term) return albums;
@@ -79,7 +79,7 @@ function AdminAlbums() {
         );
     }, [albums, search]);
 
-    // 4) handlers
+    // change handler
     const handleAlbumChange = (field, value) => {
         setAlbum((prev) => ({
             ...prev,
@@ -87,12 +87,22 @@ function AdminAlbums() {
         }));
     };
 
+    // save existing album
     const handleSave = async () => {
         if (!selectedId || !album) return;
         setSaving(true);
         setStatus(null);
         try {
-            await api.put(`/admin/albums/${selectedId}`, { album });
+            const res = await api.put(`/admin/albums/${selectedId}`, { album });
+            const updated = res.data?.album || album;
+
+            // 更新 list 裡的那一筆
+            setAlbums((prev) =>
+                prev.map((a) =>
+                    a.id === selectedId ? { ...a, ...updated } : a
+                )
+            );
+
             setStatus({
                 type: "success",
                 message: "Album updated.",
@@ -102,6 +112,45 @@ function AdminAlbums() {
             setStatus({
                 type: "error",
                 message: "Save failed.",
+            });
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // create new album
+    const handleCreateNew = async () => {
+        setSaving(true);
+        setStatus(null);
+        try {
+            const payload = {
+                album: {
+                    title: "New album",
+                    group_id: null,
+                    release_date: null,
+                    country: "",
+                    sales: null,
+                    peak_chart: null,
+                    img_url: "",
+                },
+            };
+
+            const res = await api.post("/admin/albums", payload);
+            const created = res.data.album || res.data;
+
+            setAlbums((prev) => [created, ...prev]);
+            setSelectedId(created.id);
+            setAlbum(created);
+
+            setStatus({
+                type: "success",
+                message: "Album created.",
+            });
+        } catch (err) {
+            console.error(err);
+            setStatus({
+                type: "error",
+                message: "Create failed.",
             });
         } finally {
             setSaving(false);
@@ -122,6 +171,7 @@ function AdminAlbums() {
                 onSelect={setSelectedId}
                 search={search}
                 onSearchChange={setSearch}
+                onCreate={handleCreateNew}   // 👈 傳給列表
             />
 
             <AlbumForm

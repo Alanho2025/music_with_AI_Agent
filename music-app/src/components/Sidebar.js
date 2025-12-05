@@ -54,7 +54,12 @@ function Sidebar() {
                     <span>💿</span>
                     <span>Albums</span>
                 </NavLink>
-
+                <NavLink
+                    to="/cart"
+                    className={({ isActive }) => makeClasses(isActive)}>
+                    <span>🛒</span>
+                    <span>Cart</span>
+                </NavLink>
                 <NavLink to="/playlists" className={({ isActive }) => makeClasses(isActive)}>
                     <span>🎵</span>
                     <span>Custom Playlists</span>

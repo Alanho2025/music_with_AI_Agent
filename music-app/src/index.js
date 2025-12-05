@@ -4,11 +4,14 @@ import './index.css';
 import App from './App';
 import { AuthProvider } from "./auth/AuthContext";
 import reportWebVitals from './reportWebVitals';
+import { CartProvider } from './cart/CartContext';
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AuthProvider>
-      <App />
+      <CartProvider>
+        <App />
+      </CartProvider>
     </AuthProvider>
   </React.StrictMode>
 );

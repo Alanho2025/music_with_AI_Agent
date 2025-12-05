@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
-import Groups from "./components/Groups";
+import Groups from "./pages/Groups";
 import GroupTimelinePage from "./pages/GroupTimelinePage";
 import Idols from "./pages/Idols";
 import Me from "./pages/Me";
@@ -10,8 +10,10 @@ import AdminIdols from "./pages/AdminIdols";
 import AdminHtmlImport from "./pages/AdminHtmlImport";
 import AdminAlbums from "./pages/AdminAlbums";
 import MusicPlayer from "./pages/MusicPlayer";
-import Albums from "./pages/Albums";
+import Albums from "./pages/StoreAlbums";
+import CartPage from "./pages/CartPage";
 import Playlist from "./pages/Playlist";
+import CheckoutPage from "./pages/CheckoutPage";
 function App() {
   return (
     <BrowserRouter>
@@ -26,6 +28,8 @@ function App() {
             <Route path="/idols" element={<Idols />} />
             <Route path="/music-player" element={<MusicPlayer />} />
             <Route path="/albums" element={<Albums />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/playlists" element={<Playlist />} />
             <Route path="/me" element={<Me />} />
             <Route path="/admin/videos" element={<AdminVideos />} />

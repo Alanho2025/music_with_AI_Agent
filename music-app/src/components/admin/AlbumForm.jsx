@@ -12,7 +12,6 @@ function AlbumForm({ loading, album, saving, status, onChange, onSave }) {
 
     return (
         <div className="flex-1 space-y-4">
-            {/* 狀態訊息 */}
             {status && (
                 <div
                     className={`mb-3 rounded-lg border px-3 py-2 text-xs ${status.type === "success"
@@ -35,7 +34,7 @@ function AlbumForm({ loading, album, saving, status, onChange, onSave }) {
                     />
                 </div>
 
-                {/* Group id */}
+                {/* Group ID */}
                 <div>
                     <label className="text-xs text-slate-400">Group ID</label>
                     <input
@@ -48,13 +47,27 @@ function AlbumForm({ loading, album, saving, status, onChange, onSave }) {
                     />
                 </div>
 
+                {/* Group name (read only) */}
+                <div>
+                    <label className="text-xs text-slate-400">Group name</label>
+                    <input
+                        className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-xs text-slate-300"
+                        value={album.group_name || ""}
+                        readOnly
+                    />
+                </div>
+
                 {/* Release date */}
                 <div>
                     <label className="text-xs text-slate-400">Release date</label>
                     <input
                         type="date"
                         className="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-slate-100"
-                        value={album.release_date ? album.release_date.slice(0, 10) : ""}
+                        value={
+                            album.release_date
+                                ? album.release_date.slice(0, 10)
+                                : ""
+                        }
                         onChange={(e) => onChange("release_date", e.target.value)}
                     />
                 </div>
@@ -77,7 +90,12 @@ function AlbumForm({ loading, album, saving, status, onChange, onSave }) {
                         className="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-slate-100"
                         value={album.sales ?? ""}
                         onChange={(e) =>
-                            onChange("sales", e.target.value === "" ? null : Number(e.target.value))
+                            onChange(
+                                "sales",
+                                e.target.value === ""
+                                    ? null
+                                    : Number(e.target.value)
+                            )
                         }
                     />
                 </div>
@@ -92,15 +110,62 @@ function AlbumForm({ loading, album, saving, status, onChange, onSave }) {
                         onChange={(e) =>
                             onChange(
                                 "peak_chart",
-                                e.target.value === "" ? null : Number(e.target.value)
+                                e.target.value === ""
+                                    ? null
+                                    : Number(e.target.value)
                             )
                         }
                     />
                 </div>
 
-                {/* Image URL */}
+                {/* Price (NZD) */}
+                <div>
+                    <label className="text-xs text-slate-400">Price (NZD)</label>
+                    <div className="flex">
+                        <span className="inline-flex items-center px-2 rounded-l-lg border border-slate-700 bg-slate-900 text-xs text-slate-300">
+                            $
+                        </span>
+                        <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            className="flex-1 rounded-r-lg bg-slate-950 border border-l-0 border-slate-700 px-3 py-2 text-xs text-slate-100"
+                            value={album.price_nzd ?? ""}
+                            onChange={(e) =>
+                                onChange(
+                                    "price_nzd",
+                                    e.target.value === ""
+                                        ? null
+                                        : Number(e.target.value)
+                                )
+                            }
+                        />
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-1">
+                        Base price in New Zealand dollars. Promotions will apply on top of this.
+                    </p>
+                </div>
+                {/* Stock */}
+                <div>
+                    <label className="text-xs text-slate-400">Stock</label>
+                    <input
+                        type="number"
+                        min="0"
+                        className="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-slate-100"
+                        value={album.stock ?? ""}
+                        onChange={(e) =>
+                            onChange(
+                                "stock",
+                                e.target.value === "" ? null : Number(e.target.value)
+                            )
+                        }
+                    />
+                </div>
+                {/* Album cover URL */}
                 <div className="md:col-span-2">
-                    <label className="text-xs text-slate-400">Album cover URL</label>
+                    <label className="text-xs text-slate-400">
+                        Album cover URL
+                    </label>
                     <input
                         className="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-slate-100"
                         value={album.img_url || ""}
@@ -109,7 +174,6 @@ function AlbumForm({ loading, album, saving, status, onChange, onSave }) {
                 </div>
             </div>
 
-            {/* Preview */}
             {album.img_url && (
                 <div>
                     <p className="text-xs text-slate-400 mb-1">Preview</p>
