@@ -9,11 +9,14 @@ export function AuthProvider({ children }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [profile, setProfile] = useState(null);
     const [token, setToken] = useState(null);
+    const [roles, setRoles] = useState([]);
+    const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
         keycloak
             .init({
                 onLoad: "check-sso",
+                pkceMethod: "S256", // 建議打開 PKCE
                 silentCheckSsoRedirectUri:
                     window.location.origin + "/silent-check-sso.html",
             })
@@ -28,6 +31,19 @@ export function AuthProvider({ children }) {
                     } catch (e) {
                         console.error("Failed to load user profile", e);
                     }
+                    // 這裡從 token 解析 roles
+                    const parsed = keycloak.tokenParsed || {};
+                    const realmRoles =
+                        parsed.realm_access?.roles || [];
+                    const clientRoles =
+                        parsed.resource_access?.["kpop-frontend"]?.roles || [];
+
+                    const allRoles = Array.from(
+                        new Set([...(realmRoles || []), ...(clientRoles || [])])
+                    );
+
+                    setRoles(allRoles);
+                    setIsAdmin(allRoles.includes("admin"));
                 }
 
                 setInitialized(true);
@@ -56,17 +72,34 @@ export function AuthProvider({ children }) {
         return () => clearInterval(refreshInterval);
     }, []);
 
-    const login = () => keycloak.login();
-    const logout = () => keycloak.logout({ redirectUri: window.location.origin });
+    // 一律用 window.location.origin => http://localhost:3000
+    const login = () =>
+        keycloak.login({
+            redirectUri: window.location.origin,
+        });
+
+    const logout = () =>
+        keycloak.logout({
+            redirectUri: window.location.origin,
+        });
+
+    const register = () =>
+        keycloak.register({
+            redirectUri: window.location.origin,
+        });
 
     const value = {
         initialized,
         isAuthenticated,
         profile,
         token,
+        roles,
+        isAdmin,
         login,
         logout,
+        register,
     };
+    
 
     return (
         <AuthContext.Provider value={value}>

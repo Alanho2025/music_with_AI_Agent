@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const { verifyToken } = require("./src/middlewares/auth");
 const { attachUser } = require("./src/middlewares/user");
+const { requireAdmin } = require("./src/middlewares/roles");
 const groupsRouter = require("./src/routes/groups");
 const albumRoutes = require("./src/routes/albums");
 const idolsRouter = require("./src/routes/idols");
@@ -13,6 +14,7 @@ const adminIdolsRouter = require("./src/routes/adminIdols");
 const importRoutes = require("./src/routes/importRoutes");
 const adminAlbumsRouter = require("./src/routes/adminAlbums");
 const storeAlbumsRouter = require("./src/routes/storeAlbums");
+
 const app = express();
 
 app.use(
@@ -38,18 +40,21 @@ app.use(
   "/api/admin/videos",
   verifyToken,
   attachUser,
+  requireAdmin,
   adminVideosRouter
 );
 app.use(
   "/api/admin/idols",
   verifyToken,
   attachUser,
+  requireAdmin,
   adminIdolsRouter
 );
 app.use(
   "/api/admin/albums",
   verifyToken,
   attachUser,
+  requireAdmin,
   adminAlbumsRouter
 );
 app.use("/api/import", importRoutes);
