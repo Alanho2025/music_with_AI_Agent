@@ -17,6 +17,30 @@ router.get("/", async (req, res) => {
         res.status(500).send("Failed to fetch kpop female idols");
     }
 });
+router.get("/featured", async (req, res) => {
+    try {
+        const result = await db.query(
+            `
+            SELECT 
+                i.*,
+                g.name AS group_name
+            FROM idols i
+            JOIN groups g ON i.group_id = g.id
+            ORDER BY RANDOM()
+            LIMIT 3
+            `
+        );
+
+        if (result.rows.length === 0) {
+            return res.json(null);
+        }
+
+        res.json(result.rows);
+    } catch (err) {
+        console.error("GET /api/idols/featured error:", err);
+        res.status(500).json({ error: "Failed to fetch featured idol" });
+    }
+});
 
 // 你之前 playlists 用過的 getUserId 可以抽成 util 共用
 function getUserId(req) {

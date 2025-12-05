@@ -1,5 +1,6 @@
+// src/pages/GroupTimelinePage.jsx
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import AlbumTimelineHorizontal from "../components/AlbumTimelineHorizontal";
 import AlbumDetailPanel from "../components/AlbumDetailPanel";
 import GroupSelector from "../components/GroupSelector";
@@ -11,18 +12,16 @@ export default function GroupTimelinePage() {
     const [albums, setAlbums] = useState([]);
     const [selectedAlbum, setSelectedAlbum] = useState(null);
 
-    // 1) 載入 group 列表
     useEffect(() => {
-        api.get("/groups").then((res) => setGroups(res.data));
+        api.get("/groups").then((res) => setGroups(res.data || []));
     }, []);
 
-    // 2) 載入該 group 的 timeline
     useEffect(() => {
         if (!id) return;
         api
             .get(`/groups/${id}/albums`)
             .then((res) => {
-                setAlbums(res.data);
+                setAlbums(res.data || []);
                 setSelectedAlbum(null);
             })
             .catch((err) => {
@@ -30,19 +29,55 @@ export default function GroupTimelinePage() {
             });
     }, [id]);
 
-    return (
-        <div className="flex gap-8">
-            {/* 左側 group selector */}
-            <GroupSelector groups={groups} />
+    const currentGroup = useMemo(() => {
+        const numericId = Number(id);
+        return groups.find((g) => g.id === numericId);
+    }, [groups, id]);
 
-            {/* 右側 timeline + detail */}
-            <div className="flex-1">
-                <AlbumTimelineHorizontal
-                    albums={albums}
-                    onSelectAlbum={setSelectedAlbum}
-                    selectedAlbumId={selectedAlbum?.id}
-                />
-                <AlbumDetailPanel album={selectedAlbum} />
+    return (
+        <div className="flex-1 min-h-screen bg-slate-950 px-4 py-6 md:px-6 lg:px-8">
+            {/* 這層不要再 mx-auto / max-w，寬度就是 main 的 flex 區域 */}
+            <div className="flex gap-6 items-start">
+                {/* 左側 group selector：固定寬度 */}
+                <div className="shrink-0">
+                    <GroupSelector groups={groups} />
+                </div>
+
+                {/* 右側：timeline + detail */}
+                <div className="flex flex-col gap-6 bg-slate-950">
+                    {/* Heading */}
+                    <header className="flex flex-col gap-1">
+                        <h1 className="text-lg font-semibold text-slate-100">
+                            {currentGroup
+                                ? `${currentGroup.name} album timeline`
+                                : "Album timeline"}
+                        </h1>
+                        <p className="text-xs text-slate-400 max-w-xl">
+                            Drag left or right to explore the release history, then
+                            click an album to see its details below.
+                        </p>
+                    </header>
+
+                    {/* Timeline 卡片：寬度 = 右側欄寬，不會跑到 sidebar 底下 */}
+                    <section className="max-w-7xl rounded-2xl border border-slate-600 bg-slate-800">
+                        {/* 真正負責水平捲動 */}
+                        <div className="w-full overflow-x-auto overflow-y-hidden">
+                            {/* 內容自然撐寬，只在捲動區內變長 */}
+                            <div className="inline-flex min-w-max px-6 py-6">
+                                <AlbumTimelineHorizontal
+                                    albums={albums}
+                                    onSelectAlbum={setSelectedAlbum}
+                                    selectedAlbumId={selectedAlbum?.id}
+                                />
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* 下方 detail panel */}
+                    <section className="w-full">
+                        <AlbumDetailPanel album={selectedAlbum} />
+                    </section>
+                </div>
             </div>
         </div>
     );

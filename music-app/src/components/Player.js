@@ -52,7 +52,25 @@ function Player() {
 
     const hasVideos = items.length > 0;
     const currentItem = hasVideos ? items[currentIndex] : null;
+    useEffect(() => {
+        if (!currentVideo) return;
 
+        try {
+            localStorage.setItem(
+                "kpophub:lastPlayed",
+                JSON.stringify({
+                    id: currentVideo.id,
+                    title: currentVideo.title,
+                    artist: currentVideo.artist || currentVideo.channel,
+                    groupName: currentVideo.group_name,
+                    coverUrl: currentVideo.thumbnail_url,
+                })
+            );
+        } catch (err) {
+            console.error("Failed to save lastPlayed", err);
+        }
+    }, [currentVideo]);
+    
     const handlePrev = () => {
         if (!hasVideos) return;
         setCurrentIndex((idx) => (idx > 0 ? idx - 1 : idx));

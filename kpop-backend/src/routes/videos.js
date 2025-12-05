@@ -2,7 +2,26 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../../db");
+router.get("/recommended", async (req, res) => {
+    try {
+        const result = await db.query(
+            `
+            SELECT 
+                v.*,
+                g.name AS group_name
+            FROM videos v
+            LEFT JOIN groups g ON v.group_id = g.id
+            ORDER BY RANDOM()
+            LIMIT 6
+            `
+        );
 
+        res.json(result.rows);
+    } catch (err) {
+        console.error("GET /api/videos/recommended error:", err);
+        res.status(500).json({ error: "Failed to fetch recommended videos" });
+    }
+});
 // GET /api/videos?group_id=1
 router.get("/", async (req, res) => {
     try {

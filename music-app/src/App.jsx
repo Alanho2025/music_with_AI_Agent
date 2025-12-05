@@ -19,7 +19,7 @@ function App() {
     <BrowserRouter>
       <div className="min-h-screen bg-slate-950 text-slate-50 flex">
 
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 flex-col">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/groups" element={<Groups />} />
