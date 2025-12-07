@@ -171,7 +171,7 @@ function AdminAlbums() {
                 onSelect={setSelectedId}
                 search={search}
                 onSearchChange={setSearch}
-                onCreate={handleCreateNew}   // 👈 傳給列表
+                onCreate={handleCreateNew}
             />
 
             <AlbumForm

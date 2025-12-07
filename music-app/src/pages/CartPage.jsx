@@ -2,19 +2,24 @@
 import React, { useMemo } from "react";
 import { useCart } from "../cart/CartContext";
 import { useNavigate } from "react-router-dom";
+import OrderSummaryCard from "../cart/OrderSummaryCard";
+import { calculateTotals } from "../cart/pricing";
 
 function CartPage() {
-    const { items, totalItems, totalPrice, updateQuantity, removeItem, clearCart } =
-        useCart();
+    const {
+        items,
+        totalItems,
+        totalPrice,
+        updateQuantity,
+        removeItem,
+        clearCart,
+    } = useCart();
     const navigate = useNavigate();
 
-    const shipping = useMemo(() => {
-        if (totalPrice === 0) return 0;
-        // 先簡單：滿 100 免運，不滿 100 運費 10
-        return totalPrice >= 100 ? 0 : 10;
-    }, [totalPrice]);
-
-    const grandTotal = totalPrice + shipping;
+    const { shipping, grandTotal } = useMemo(
+        () => calculateTotals(totalPrice),
+        [totalPrice]
+    );
 
     const handleQtyChange = (item, next) => {
         const maxStock =
@@ -97,7 +102,9 @@ function CartPage() {
                                         </div>
                                         <button
                                             type="button"
-                                            onClick={() => removeItem(item.id)}
+                                            onClick={() =>
+                                                removeItem(item.id)
+                                            }
                                             className="text-[11px] text-slate-500 hover:text-slate-200"
                                         >
                                             ✕
@@ -115,18 +122,19 @@ function CartPage() {
                                                     )}`
                                                     : "Price TBA"}
                                             </span>
-                                            {typeof item.stock === "number" && (
-                                                <span
-                                                    className={`text-[11px] ${outOfStock
-                                                            ? "text-red-400"
-                                                            : "text-emerald-400"
-                                                        }`}
-                                                >
-                                                    {outOfStock
-                                                        ? "Out of stock"
-                                                        : `In stock: ${item.stock}`}
-                                                </span>
-                                            )}
+                                            {typeof item.stock ===
+                                                "number" && (
+                                                    <span
+                                                        className={`text-[11px] ${outOfStock
+                                                                ? "text-red-400"
+                                                                : "text-emerald-400"
+                                                            }`}
+                                                    >
+                                                        {outOfStock
+                                                            ? "Out of stock"
+                                                            : `In stock: ${item.stock}`}
+                                                    </span>
+                                                )}
                                         </div>
 
                                         {/* qty control */}
@@ -179,8 +187,7 @@ function CartPage() {
                                                 Subtotal
                                             </p>
                                             <p className="text-sm font-semibold text-slate-50">
-                                                $
-                                                {itemTotal.toFixed(2)}
+                                                ${itemTotal.toFixed(2)}
                                             </p>
                                         </div>
                                     </div>
@@ -191,62 +198,34 @@ function CartPage() {
                 </div>
             </div>
 
-            {/* Right: summary */}
-            <aside className="w-full lg:w-80 lg:self-start">
-                <div className="sticky top-4 rounded-2xl border border-slate-800 bg-slate-950 p-4 space-y-4">
-                    <h2 className="text-sm font-semibold text-slate-50">
-                        Order summary
-                    </h2>
+            {/* Right: shared summary card */}
+            <OrderSummaryCard
+                totalItems={totalItems}
+                subtotal={totalPrice}
+                shipping={shipping}
+                grandTotal={grandTotal}
+            >
+                <button
+                    type="button"
+                    onClick={() => navigate("/checkout")}
+                    className="w-full rounded-full bg-pink-500 text-xs font-semibold text-white py-2.5 hover:bg-pink-400"
+                >
+                    Proceed to checkout
+                </button>
 
-                    <div className="flex items-center justify-between text-xs">
-                        <span className="text-slate-400">
-                            Items ({totalItems})
-                        </span>
-                        <span className="text-slate-100">
-                            ${totalPrice.toFixed(2)}
-                        </span>
-                    </div>
+                <button
+                    type="button"
+                    onClick={() => navigate("/albums")}
+                    className="w-full rounded-full border border-slate-700 text-xs font-semibold text-slate-100 py-2 hover:bg-slate-900"
+                >
+                    Continue shopping
+                </button>
 
-                    <div className="flex items-center justify-between text-xs">
-                        <span className="text-slate-400">Shipping</span>
-                        <span className="text-slate-100">
-                            {shipping === 0
-                                ? "Free"
-                                : `$${shipping.toFixed(2)}`}
-                        </span>
-                    </div>
-
-                    <hr className="border-slate-800" />
-
-                    <div className="flex items-center justify-between text-sm font-semibold">
-                        <span className="text-slate-100">Total</span>
-                        <span className="text-slate-50">
-                            ${grandTotal.toFixed(2)} NZD
-                        </span>
-                    </div>
-
-                    <button
-                        type="button"
-                        onClick={() => navigate("/checkout")}
-                        className="w-full rounded-full bg-pink-500 text-xs font-semibold text-white py-2.5 hover:bg-pink-400"
-                    >
-                        Proceed to checkout
-                    </button>
-
-
-                    <button
-                        type="button"
-                        className="w-full rounded-full border border-slate-700 text-xs font-semibold text-slate-100 py-2 hover:bg-slate-900"
-                    >
-                        Continue shopping
-                    </button>
-
-                    <p className="text-[10px] text-slate-500">
-                        Prices are shown in NZD. Taxes and final shipping cost
-                        will be calculated at checkout.
-                    </p>
-                </div>
-            </aside>
+                <p className="text-[10px] text-slate-500">
+                    Prices are shown in NZD. Taxes and final shipping cost will
+                    be calculated at checkout.
+                </p>
+            </OrderSummaryCard>
         </div>
     );
 }
