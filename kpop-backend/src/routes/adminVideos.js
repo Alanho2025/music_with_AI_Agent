@@ -164,7 +164,7 @@ router.post("/", async (req, res) => {
             views,
             likes,
         } = req.body;
-
+        const album_id = req.body.album_id || null;
         if (!title || !youtube_id) {
             return res
                 .status(400)
@@ -188,12 +188,13 @@ router.post("/", async (req, res) => {
          era,
          duration_seconds,
          views,
-         likes
+         likes,
+         album_id
        )
        VALUES (
          $1, $2, $3, $4, $5, $6,
          $7, $8, $9, $10, $11,
-         $12, $13, $14
+         $12, $13, $14, $15
        )
        RETURNING *`,
             [
@@ -211,6 +212,7 @@ router.post("/", async (req, res) => {
                 duration_seconds || null,
                 views || null,
                 likes || null,
+                album_id || null,
             ]
         );
 
@@ -229,7 +231,7 @@ router.post("/", async (req, res) => {
 // --------- 3. List existing videos (for admin page) ---------
 router.get("/", async (req, res) => {
     try {
-        const { search, limit = 50, offset = 0 } = req.query;
+        const { search, limit = 200, offset = 0 } = req.query;
 
         const values = [];
         let where = "";
@@ -299,7 +301,7 @@ router.get("/:id", async (req, res) => {
 router.put("/:id", async (req, res) => {
     try {
         const videoId = parseInt(req.params.id, 10);
-
+        const album_id = req.body.album_id || null;
         const {
             group_id,
             title,
@@ -341,8 +343,9 @@ router.put("/:id", async (req, res) => {
          era = $11,
          duration_seconds = $12,
          views = $13,
-         likes = $14
-       WHERE id = $15
+         likes = $14,
+         album_id = $15
+       WHERE id = $16
        RETURNING *`,
             [
                 group_id || null,
@@ -359,6 +362,7 @@ router.put("/:id", async (req, res) => {
                 duration_seconds || null,
                 views || null,
                 likes || null,
+                album_id || null,    
                 videoId,
             ]
         );

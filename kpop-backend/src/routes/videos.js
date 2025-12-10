@@ -2,24 +2,42 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../../db");
+const { pickWithGroupLimit } = require("../utils/recommendUtils");
 router.get("/recommended", async (req, res) => {
     try {
-        const result = await db.query(
+        const { rows } = await db.query(
             `
-            SELECT 
-                v.*,
-                g.name AS group_name
-            FROM videos v
-            LEFT JOIN groups g ON v.group_id = g.id
-            ORDER BY RANDOM()
-            LIMIT 6
-            `
+        SELECT
+          v.*,
+          g.name AS group_name,
+          -- 人氣 + 時間衰退分數
+          (
+            (0.7 * LN(v.views + 1) + 0.3 * v.likes) *
+            EXP(
+              -0.01 * GREATEST(
+                EXTRACT(EPOCH FROM (NOW() - v.publish_date)) / 86400,
+                0
+              )
+            )
+          ) AS score
+        FROM videos v
+        LEFT JOIN groups g ON v.group_id = g.id
+        WHERE v.views IS NOT NULL
+          AND v.likes IS NOT NULL
+        ORDER BY score DESC
+        LIMIT 30
+        `
         );
 
-        res.json(result.rows);
+        // 每個 group 最多 3 支，總共 6 支
+        const topVideos = pickWithGroupLimit(rows, 6, "group_id", 3);
+
+        res.json(topVideos);
     } catch (err) {
         console.error("GET /api/videos/recommended error:", err);
-        res.status(500).json({ error: "Failed to fetch recommended videos" });
+        res
+            .status(500)
+            .json({ error: "Failed to fetch recommended videos" });
     }
 });
 // GET /api/videos?group_id=1

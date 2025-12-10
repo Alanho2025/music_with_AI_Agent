@@ -26,7 +26,7 @@ export default function RecommendationsRow({
                 className={
                     isGrid
                         ? "grid gap-3 grid-cols-2 md:grid-cols-3 xl:grid-cols-3"
-                        : "flex gap-3 overflow-x-auto pb-1"
+                        : "grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-8"
                 }
             >
                 {items.map((item) => {

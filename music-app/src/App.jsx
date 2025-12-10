@@ -18,7 +18,7 @@ function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-slate-950 text-slate-50 flex">
-
+        <Sidebar />
         <main className="flex-1 p-6 flex-col">
           <Routes>
             <Route path="/" element={<Home />} />
@@ -38,7 +38,7 @@ function App() {
             <Route path="/admin/albums" element={<AdminAlbums />} />
           </Routes>
         </main>
-        <Sidebar />
+        
       </div>
     </BrowserRouter>
   );

@@ -152,7 +152,7 @@ function Sidebar() {
                         className={({ isActive }) => makeClasses(isActive)}
                     >
                         <span>🎵</span>
-                        <span>Admin Videos</span>
+                        <span>Import Videos</span>
                     </NavLink>
 
                     <NavLink

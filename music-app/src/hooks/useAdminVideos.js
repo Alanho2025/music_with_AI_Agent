@@ -1,5 +1,5 @@
 // src/hooks/useAdminVideos.js
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const EMPTY_FORM = {
     group_id: "",
@@ -18,13 +18,13 @@ const EMPTY_FORM = {
     likes: "",
 };
 
-export function useAdminVideos({ secureApi, isAuthenticated }) {
-    const [groupsLoadedOnce] = useState(true); // 只是保留可能擴充
 
+export function useAdminVideos({ secureApi, isAuthenticated }) {
+    // raw data
     const [videos, setVideos] = useState([]);
     const [listLoading, setListLoading] = useState(false);
     const [selectedVideoId, setSelectedVideoId] = useState(null);
-
+    const [albums, setAlbums] = useState([]);
     // filters
     const [searchTerm, setSearchTerm] = useState("");
     const [letterFilter, setLetterFilter] = useState("");
@@ -45,28 +45,49 @@ export function useAdminVideos({ secureApi, isAuthenticated }) {
         setForm(EMPTY_FORM);
     };
 
+    // keep latest secureApi in a ref so that we do not need to depend on it
+    const apiRef = useRef(secureApi);
+    useEffect(() => {
+        apiRef.current = secureApi;
+    }, [secureApi]);
+    const loadAlbums = useCallback(async () => {
+        if (!apiRef.current) return;
+        try {
+            setListLoading(true);
+            setError(null);
+            const res = await apiRef.current.get("/admin/albums");
+            setAlbums(res.data || []);
+        } catch (err) {
+            console.error("Failed to load albums", err);
+        } finally {
+            setListLoading(false);
+        }
+    }, []);
+
     const loadVideos = useCallback(async () => {
-        if (!secureApi) return;
+        if (!apiRef.current) return;
 
         try {
             setListLoading(true);
             setError(null);
-            const res = await secureApi.get("/admin/videos");
+            const res = await apiRef.current.get("/admin/videos");
             setVideos(res.data || []);
         } catch (err) {
             console.error("list videos error", err);
             setError(
-                err.response?.data?.error || "Failed to load existing videos."
+                err?.response?.data?.error || "Failed to load existing videos."
             );
         } finally {
             setListLoading(false);
         }
-    }, [secureApi]);
+    }, []);
 
+    // only trigger when auth state flips to true
     useEffect(() => {
         if (!isAuthenticated) return;
         loadVideos();
-    }, [isAuthenticated, loadVideos]);
+        loadAlbums();
+    }, [isAuthenticated, loadVideos, loadAlbums]);
 
     // unique group names for tag filter
     const groupNameOptions = useMemo(() => {
@@ -116,36 +137,40 @@ export function useAdminVideos({ secureApi, isAuthenticated }) {
     }, [videos, searchTerm, letterFilter, groupFilter, sortOrder]);
 
     const handleFetchMeta = async () => {
-        if (!secureApi) return;
+        if (!apiRef.current) return;
+        if (!youtubeUrl.trim()) return;
+
         try {
             setError(null);
             setMessage(null);
             setLoadingMeta(true);
 
-            const res = await secureApi.post("/admin/videos/fetch-youtube", {
+            const res = await apiRef.current.post("/admin/videos/fetch-youtube", {
                 youtubeUrl,
             });
 
-            const data = res.data;
+            const data = res.data || {};
 
             setForm((prev) => ({
                 ...prev,
-                youtube_id: data.youtube_id,
-                title: data.title,
-                description: data.description,
-                publish_date: data.publish_date ? data.publish_date.slice(0, 10) : "",
-                thumbnail_url: data.thumbnail_url || "",
+                youtube_id: data.youtube_id || prev.youtube_id,
+                title: data.title || prev.title,
+                description: data.description || prev.description,
+                publish_date: data.publish_date
+                    ? data.publish_date.slice(0, 10)
+                    : prev.publish_date,
+                thumbnail_url: data.thumbnail_url || prev.thumbnail_url,
                 tags: (data.tags || []).join(", "),
-                duration_seconds: data.duration_seconds || "",
-                views: data.views || "",
-                likes: data.likes || "",
+                duration_seconds: data.duration_seconds || prev.duration_seconds,
+                views: data.views || prev.views,
+                likes: data.likes || prev.likes,
             }));
 
             setMessage("YouTube metadata loaded. You can adjust fields and save.");
         } catch (err) {
             console.error("fetch meta error", err);
             setError(
-                err.response?.data?.error || "Failed to fetch YouTube metadata."
+                err?.response?.data?.error || "Failed to fetch YouTube metadata."
             );
         } finally {
             setLoadingMeta(false);
@@ -160,8 +185,10 @@ export function useAdminVideos({ secureApi, isAuthenticated }) {
     };
 
     const handleSave = async (e) => {
-        e.preventDefault();
-        if (!secureApi) return;
+        if (e && e.preventDefault) {
+            e.preventDefault();
+        }
+        if (!apiRef.current) return;
 
         try {
             setSaving(true);
@@ -180,26 +207,33 @@ export function useAdminVideos({ secureApi, isAuthenticated }) {
 
             let res;
             if (selectedVideoId) {
-                res = await secureApi.put(`/admin/videos/${selectedVideoId}`, payload);
+                res = await apiRef.current.put(
+                    `/admin/videos/${selectedVideoId}`,
+                    payload
+                );
                 setMessage(`Updated video: ${res.data.title}`);
             } else {
-                res = await secureApi.post("/admin/videos", payload);
+                res = await apiRef.current.post("/admin/videos", payload);
                 setMessage(`Saved video: ${res.data.title}`);
             }
 
             await loadVideos();
+            resetForm();
         } catch (err) {
             console.error("save video error", err);
-            setError(err.response?.data?.error || "Failed to save video.");
+            setError(err?.response?.data?.error || "Failed to save video.");
         } finally {
             setSaving(false);
         }
     };
 
     const handleEdit = (video) => {
+        if (!video) return;
+
         setSelectedVideoId(video.id);
         setForm({
-            group_id: video.group_id || "",
+            group_id: video.group_id || "", 
+            album_id: video.album_id || "",
             title: video.title || "",
             youtube_id: video.youtube_id || "",
             category: video.category || "",
@@ -222,7 +256,7 @@ export function useAdminVideos({ secureApi, isAuthenticated }) {
     };
 
     const handleDelete = async (videoId) => {
-        if (!secureApi) return;
+        if (!apiRef.current) return;
 
         const confirmDelete = window.confirm(
             "Delete this video? It will also be removed from any playlists."
@@ -232,7 +266,7 @@ export function useAdminVideos({ secureApi, isAuthenticated }) {
         try {
             setError(null);
             setMessage(null);
-            await secureApi.delete(`/admin/videos/${videoId}`);
+            await apiRef.current.delete(`/admin/videos/${videoId}`);
 
             if (selectedVideoId === videoId) {
                 resetForm();
@@ -242,7 +276,7 @@ export function useAdminVideos({ secureApi, isAuthenticated }) {
             setMessage("Video deleted.");
         } catch (err) {
             console.error("delete video error", err);
-            setError(err.response?.data?.error || "Failed to delete video.");
+            setError(err?.response?.data?.error || "Failed to delete video.");
         }
     };
 
@@ -280,5 +314,6 @@ export function useAdminVideos({ secureApi, isAuthenticated }) {
         handleEdit,
         handleDelete,
         resetForm,
+        albums,
     };
 }

@@ -1,5 +1,5 @@
 // src/components/admin/videos/VideoFormPanel.jsx
-import React from "react";
+import React, { useMemo } from "react";
 
 function VideoFormPanel({
     groups,
@@ -15,8 +15,17 @@ function VideoFormPanel({
     onCancel,
     error,
     message,
+    albums,
 }) {
+    const safeAlbums = Array.isArray(albums) ? albums : [];
+    const filteredAlbums = useMemo(() => {
+        if (!Array.isArray(albums) || !form.group_id) return [];
+        return albums.filter(
+            (a) => Number(a.group_id) === Number(form.group_id)
+        );
+    }, [safeAlbums, form.group_id]);
     return (
+
         <div className="flex flex-col gap-4">
             {/* YouTube URL */}
             <div className="flex flex-col gap-2">
@@ -61,7 +70,23 @@ function VideoFormPanel({
                             ))}
                         </select>
                     </div>
-
+                    {/* Album Select */}
+                    <div>
+                        <label className="text-sm text-slate-300">Album</label>
+                        <select
+                            className="w-full bg-slate-700 text-white px-3 py-2 rounded"
+                            value={form.album_id || ""}
+                            onChange={(e) => onChange("album_id", e.target.value)}
+                            disabled={!form.group_id}
+                        >
+                            <option value="">No album</option>
+                            {filteredAlbums.map((a) => (
+                                <option key={a.id} value={a.id}>
+                                    {a.title}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                     <div>
                         <label className="text-xs text-slate-400">Title</label>
                         <input

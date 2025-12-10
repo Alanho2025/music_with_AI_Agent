@@ -1,5 +1,5 @@
 // src/pages/AdminVideos.jsx
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { useSecureApi } from "../api/secureClient";
 
@@ -12,13 +12,33 @@ import VideoFormPanel from "../components/admin/videos/VideoFormPanel";
 function AdminVideos() {
     const { isAuthenticated } = useAuth();
     const secureApi = useSecureApi();
-
+    const apiRef = useRef(secureApi);
     // public groups
     const { groups } = useGroups();
-
+    const [albums, setAlbums] = useState([]);
     // admin video CRUD + filters + form
     const adminVideos = useAdminVideos({ secureApi, isAuthenticated });
+    useEffect(() => {
+        if (!isAuthenticated) return;
 
+        let cancelled = false;
+
+        async function loadAlbums() {
+            try {
+                const res = await apiRef.current.get("/admin/albums");
+                if (cancelled) return;
+                setAlbums(Array.isArray(res.data) ? res.data : []);
+            } catch (err) {
+                console.error("Failed to load albums for admin videos:", err);
+            }
+        }
+
+        loadAlbums();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [isAuthenticated]);
     if (!isAuthenticated) {
         return (
             <div className="flex flex-col gap-4">
@@ -29,6 +49,7 @@ function AdminVideos() {
             </div>
         );
     }
+    
 
     const {
         videos,
@@ -94,6 +115,7 @@ function AdminVideos() {
                     onCancel={resetForm}
                     error={error}
                     message={message}
+                    albums={albums}
                 />
                 <ExistingVideosPanel
                     videos={videos}
