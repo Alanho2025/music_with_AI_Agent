@@ -14,7 +14,7 @@ function AdminAlbums() {
     const [saving, setSaving] = useState(false);
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState(null);
-
+    const [groups, setGroups] = useState([]);
     // load albums list
     useEffect(() => {
         let cancelled = false;
@@ -22,8 +22,10 @@ function AdminAlbums() {
         async function loadAlbums() {
             try {
                 const res = await api.get("/admin/albums");
+                const group = await api.get("/groups");
                 if (cancelled) return;
                 setAlbums(res.data);
+                setGroups(group.data);
                 if (res.data.length > 0) {
                     setSelectedId(res.data[0].id);
                 }
@@ -181,6 +183,7 @@ function AdminAlbums() {
                 status={status}
                 onChange={handleAlbumChange}
                 onSave={handleSave}
+                groups={groups}
             />
         </div>
     );

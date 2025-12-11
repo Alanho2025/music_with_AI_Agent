@@ -1,7 +1,7 @@
 // src/components/admin/AlbumForm.jsx
 import React from "react";
 
-function AlbumForm({ loading, album, saving, status, onChange, onSave }) {
+function AlbumForm({ loading, album, saving, status, onChange, onSave, groups = []}) {
     if (loading || !album) {
         return (
             <div className="flex-1">
@@ -9,7 +9,18 @@ function AlbumForm({ loading, album, saving, status, onChange, onSave }) {
             </div>
         );
     }
+    const handleGroupChange = (e) => {
+        const value = e.target.value === "" ? null : Number(e.target.value);
+        onChange("group_id", value);
 
+        // 順便更新 group_name，讓下面那個 readOnly 欄位跟著變
+        const selected = groups.find((g) => g.id === value);
+        if (selected) {
+            onChange("group_name", selected.name);
+        } else {
+            onChange("group_name", "");
+        }
+    };
     return (
         <div className="flex-1 space-y-4">
             {status && (
@@ -36,15 +47,19 @@ function AlbumForm({ loading, album, saving, status, onChange, onSave }) {
 
                 {/* Group ID */}
                 <div>
-                    <label className="text-xs text-slate-400">Group ID</label>
-                    <input
-                        type="number"
+                    <label className="text-xs text-slate-400">Group</label>
+                    <select
                         className="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-slate-100"
-                        value={album.group_id || ""}
-                        onChange={(e) =>
-                            onChange("group_id", Number(e.target.value) || null)
-                        }
-                    />
+                        value={album.group_id ?? ""}
+                        onChange={handleGroupChange}
+                    >
+                        <option value="">Select a group</option>
+                        {groups.map((g) => (
+                            <option key={g.id} value={g.id}>
+                                {g.name} (ID: {g.id})
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 {/* Group name (read only) */}
