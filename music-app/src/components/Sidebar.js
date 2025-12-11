@@ -22,7 +22,7 @@ function Sidebar() {
                     K-pop Hub
                 </p>
                 <p className="text-sm text-slate-400 mt-1">
-                    Browse groups, idols, and your account.
+                    All your K-pop spaces in one place.
                 </p>
             </div>
 

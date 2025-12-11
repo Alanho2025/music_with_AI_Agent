@@ -139,6 +139,7 @@ function MusicPlayer() {
 
                 {/* 右：播放器 */}
                 <VideoPlayerPanel
+                    key={currentVideo?.id || "no-video"}
                     currentVideo={currentVideo}
                     youtubeUrl={youtubeUrl}
                     hasPrev={hasPrev}

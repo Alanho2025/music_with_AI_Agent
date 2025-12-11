@@ -18,7 +18,7 @@ export function usePlaylistFilter(secureApi) {
         }
 
         loadPlaylists();
-    }, [secureApi]);
+    }, []);
 
     // 點選 playlist tag
     const handlePlaylistSelect = useCallback(

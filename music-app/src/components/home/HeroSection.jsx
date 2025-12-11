@@ -12,8 +12,7 @@ export default function HeroSection({ displayName }) {
                 Welcome back{displayName ? `, ${displayName}` : ""}.
             </h1>
             <p className="text-sm text-slate-300 max-w-xl">
-                Play your favorite tracks, browse idols, and manage your own K-pop
-                database in one place.
+                Keep your favorite groups, albums, playlists, and stats together, ready to play anytime.
             </p>
             <div className="mt-2 flex flex-wrap gap-3">
                 <Link
