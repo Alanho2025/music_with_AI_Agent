@@ -14,7 +14,7 @@ const adminIdolsRouter = require("./src/routes/adminIdols");
 const importRoutes = require("./src/routes/importRoutes");
 const adminAlbumsRouter = require("./src/routes/adminAlbums");
 const storeAlbumsRouter = require("./src/routes/storeAlbums");
-
+const userRoutes = require("./src/routes/users");
 const app = express();
 
 app.use(
@@ -59,6 +59,8 @@ app.use(
 );
 app.use("/api/import", importRoutes);
 app.use("/api/store/albums", storeAlbumsRouter);
+app.use("/api/users", verifyToken,
+  attachUser, userRoutes);
 const PORT = 8080;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

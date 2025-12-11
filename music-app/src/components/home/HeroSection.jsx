@@ -1,33 +1,41 @@
 // src/components/home/HeroSection.jsx
 import React from "react";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useSecureApi } from "../../api/secureClient";
+
 
 export default function HeroSection({ displayName }) {
+    const secureApi = useSecureApi();
+    const [heroBg, setHeroBg] = useState(null);
+    const [heroPosX, setHeroPosX] = useState(50);
+    const [heroPosY, setHeroPosY] = useState(50);
+
+    useEffect(() => {
+        async function load() {
+            const res = await secureApi.get("/users/me/hero-background");
+            setHeroBg(res.data.url);
+            setHeroPosX(res.data.posX ?? 50);
+            setHeroPosY(res.data.posY ?? 50);
+        }
+        load();
+    }, []);
     return (
-        <section className="flex flex-col gap-3 rounded-2xl bg-gradient-to-r from-fuchsia-600/20 via-purple-500/10 to-sky-500/20 border border-slate-800 px-6 py-5">
-            <p className="text-xs uppercase tracking-[0.25em] text-slate-400">
-                K-pop Music Hub
-            </p>
-            <h1 className="text-2xl md:text-3xl font-semibold text-slate-50">
-                Welcome back{displayName ? `, ${displayName}` : ""}.
-            </h1>
-            <p className="text-sm text-slate-300 max-w-xl">
-                Keep your favorite groups, albums, playlists, and stats together, ready to play anytime.
-            </p>
-            <div className="mt-2 flex flex-wrap gap-3">
-                <Link
-                    to="/music"
-                    className="inline-flex items-center rounded-full bg-fuchsia-500 px-4 py-1.5 text-xs font-medium text-white hover:bg-fuchsia-400 transition"
-                >
-                    Open Music Player
-                </Link>
-                <Link
-                    to="/idols"
-                    className="inline-flex items-center rounded-full border border-slate-600 px-4 py-1.5 text-xs font-medium text-slate-100 hover:border-slate-400 transition"
-                >
-                    Browse Idols
-                </Link>
-            </div>
+        <div className="rounded-[32px] overflow-hidden shadow-lg">
+
+        
+        <section
+            className="w-full aspect-[5/1] bg-cover bg-no-repeat"
+            style={{
+                backgroundImage: heroBg
+                    ? `url(${heroBg})`
+                    : "linear-gradient(to right, #5b21b6, #1e3a8a)",
+                backgroundSize: "cover",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: `${heroPosX}% ${heroPosY}%`,
+        }}
+        >
         </section>
+        </div>
     );
 }

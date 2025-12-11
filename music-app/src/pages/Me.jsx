@@ -1,4 +1,5 @@
 import { useAuth } from "../auth/AuthContext";
+import { Link } from "react-router-dom";
 
 function Me() {
     const { isAuthenticated, profile } = useAuth();
@@ -24,15 +25,14 @@ function Me() {
                     Welcome back, {profile?.firstName || profile?.username}.
                 </p>
             </header>
+            <Link
+                to="/dashboard/hero-background"
+                className="px-3 py-2 rounded-md bg-slate-800 hover:bg-slate-700 text-sm text-slate-100"
+            >
+                Customize Home Banner
+            </Link>
 
-            <div className="bg-slate-900 rounded-2xl p-4 text-sm text-slate-300">
-                <p>Here we will show:</p>
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                    <li>Your group subscriptions</li>
-                    <li>Your playlists</li>
-                    <li>Recommended videos and events</li>
-                </ul>
-            </div>
+            
         </div>
     );
 }

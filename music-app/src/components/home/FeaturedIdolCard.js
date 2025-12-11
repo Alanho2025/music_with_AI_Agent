@@ -91,9 +91,7 @@ function FeaturedIdolCard() {
             </div>
 
             <p className="text-xs text-slate-400 leading-relaxed">
-                This card is powered by the <code>/idols/featured</code>{" "}
-                endpoint. Each refresh can highlight up to three different
-                idols from your database.
+                Discover spotlight idols from your collection.
             </p>
         </div>
     );

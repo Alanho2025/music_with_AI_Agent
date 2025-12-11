@@ -14,6 +14,7 @@ import Albums from "./pages/StoreAlbums";
 import CartPage from "./pages/CartPage";
 import Playlist from "./pages/Playlist";
 import CheckoutPage from "./pages/CheckoutPage";
+import HeroBackgroundEditor from "./pages/dashboard/HeroBackgroundEditor";
 function App() {
   return (
     <BrowserRouter>
@@ -32,6 +33,7 @@ function App() {
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/playlists" element={<Playlist />} />
             <Route path="/me" element={<Me />} />
+            <Route path="/dashboard/hero-background" element={<HeroBackgroundEditor />} />
             <Route path="/admin/videos" element={<AdminVideos />} />
             <Route path="/admin/idols" element={<AdminIdols />} />
             <Route path="/admin/import" element={<AdminHtmlImport />} />

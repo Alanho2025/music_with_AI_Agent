@@ -26,7 +26,7 @@ export default function Home() {
     const [videos, setVideos] = useState([]);
     const [albums, setAlbums] = useState([]);
     const [loading, setLoading] = useState(true);
-
+    
     useEffect(() => {
         let cancelled = false;
 
@@ -77,7 +77,6 @@ export default function Home() {
         () => shuffleArray(albums).slice(0, 8),
         [albums],
     );
-
     return (
         <div className="flex flex-col gap-6 px-4 py-6 md:px-6 lg:px-8">
             <HeroSection displayName={displayName} />
