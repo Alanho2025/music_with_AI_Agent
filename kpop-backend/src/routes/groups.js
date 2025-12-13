@@ -7,7 +7,7 @@ const db = require("../../db");
 router.get("/", async (req, res) => {
     try {
         const result = await db.query(
-            `SELECT id, name, debut_date 
+            `SELECT id, name, debut_date, group_img_url, fanclub_name, company, members_count
          FROM groups
          ORDER BY debut_date ASC`
         );

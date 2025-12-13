@@ -320,5 +320,72 @@ router.get("/subscriptions", async (req, res) => {
         res.status(500).json({ error: "Failed to load subscriptions" });
     }
 });
+// GET /users/follow-groups
+router.get("/follow-groups", async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const result = await db.query(
+            `SELECT group_id, notify
+             FROM user_follow_groups
+             WHERE user_id = $1`,
+            [userId]
+        );
+
+        res.json(result.rows);
+    } catch (err) {
+        console.error("GET /users/follow-groups error", err);
+        res.status(500).json({ error: "Failed to load follow groups" });
+    }
+});
+
+// POST /users/follow-groups  (follow or update notify)
+router.post("/follow-groups", async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { group_id, notify } = req.body;
+
+        if (!group_id) {
+            return res.status(400).json({ error: "group_id is required" });
+        }
+
+        await db.query(
+            `
+            INSERT INTO user_follow_groups (user_id, group_id, notify)
+            VALUES ($1, $2, COALESCE($3, TRUE))
+            ON CONFLICT (user_id, group_id)
+            DO UPDATE SET notify = EXCLUDED.notify
+            `,
+            [userId, group_id, notify]
+        );
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error("POST /users/follow-groups error", err);
+        res.status(500).json({ error: "Failed to follow group" });
+    }
+});
+
+// DELETE /users/follow-groups/:groupId  (unfollow)
+router.delete(
+    "/follow-groups/:groupId",
+    async (req, res) => {
+        try {
+            const userId = req.user.id;
+            const { groupId } = req.params;
+
+            await db.query(
+                `DELETE FROM user_follow_groups 
+                 WHERE user_id = $1 AND group_id = $2`,
+                [userId, groupId]
+            );
+
+            res.json({ success: true });
+        } catch (err) {
+            console.error("DELETE /users/follow-groups/:groupId error", err);
+            res.status(500).json({ error: "Failed to unfollow group" });
+        }
+    }
+);
 
 module.exports = router;

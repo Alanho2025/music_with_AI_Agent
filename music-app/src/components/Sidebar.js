@@ -1,10 +1,15 @@
-import { NavLink } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { useSecureApi } from "../api/secureClient";
+
 
 function Sidebar() {
     const { isAuthenticated, isAdmin, profile, login, logout, register, initialized } =
         useAuth();
-
+    const [unreadCount, setUnreadCount] = useState(0);
+    const navigate = useNavigate();
+    const secureApi = useSecureApi();
     const baseItemClasses =
         "flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition";
     const inactiveClasses =
@@ -13,6 +18,36 @@ function Sidebar() {
 
     const makeClasses = (isActive) =>
         `${baseItemClasses} ${isActive ? activeClasses : inactiveClasses}`;
+    useEffect(() => {
+        if (!isAuthenticated) {
+            setUnreadCount(0);
+            return;
+        }
+
+        let cancelled = false;
+
+        async function fetchUnread() {
+            try {
+                const res = await secureApi.get(
+                    "/users/notifications/unread-count"
+                );
+                if (cancelled) return;
+                const count = Number(res.data?.count || 0);
+                setUnreadCount(Number.isNaN(count) ? 0 : count);
+            } catch (err) {
+                console.warn("Failed to fetch unread notifications", err);
+            }
+        }
+
+        fetchUnread();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [isAuthenticated]);
+    function handleNotificationClick() {
+        navigate("/notifications");
+    }
 
     return (
         <aside className="w-60 bg-slate-950 border-l border-slate-800 px-4 py-6 flex flex-col">
@@ -32,7 +67,7 @@ function Sidebar() {
                     <p className="text-xs text-slate-500">Checking login...</p>
                 ) : isAuthenticated ? (
                     <>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-between gap-3">
                             <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs text-slate-100">
                                 {profile?.firstName?.[0] ||
                                     profile?.username?.[0] ||
@@ -48,6 +83,23 @@ function Sidebar() {
                                     Logged in
                                 </span>
                             </div>
+                                <button
+                                    type="button"
+                                    onClick={handleNotificationClick}
+                                    className="relative inline-flex items-center justify-center w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 transition"
+                                >
+                                    <span className="text-slate-200 text-lg">
+                                        🔔
+                                    </span>
+
+                                    {unreadCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-[10px] font-semibold text-white flex items-center justify-center">
+                                            {unreadCount > 99
+                                                ? "99+"
+                                                : unreadCount}
+                                        </span>
+                                    )}
+                                </button>
                         </div>
 
                         <button
