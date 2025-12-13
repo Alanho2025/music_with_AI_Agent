@@ -5,7 +5,8 @@ import { useComments } from "./hooks/useComments";
 import UpNextList from "./UpNextList";
 import CommentList from "./CommentList";
 import LikeButton from "./LikeButton";
-
+import { useSecureApi } from "../../api/secureClient";
+import { useEffect } from "react";
 function getVideoTitle(video) {
     if (!video) return "";
     if (video.group_name) {
@@ -24,6 +25,7 @@ function VideoPlayerPanel({
     upNext,
     onSelectFromUpNext,
 }) {
+    const api = useSecureApi();
     const {
         meta,
         metaLoading,
@@ -48,6 +50,55 @@ function VideoPlayerPanel({
         submitting,
     } = useComments(currentVideo);
 
+
+    useEffect(() => {
+        if (!currentVideo || !currentVideo.id) return;
+        if (typeof window === "undefined") return;
+
+        const now = Date.now();
+        const storageKey = "last_watch_log";
+
+        // 從 sessionStorage 拿上一筆紀錄
+        let last = null;
+        const raw = window.sessionStorage.getItem(storageKey);
+        if (raw) {
+            try {
+                last = JSON.parse(raw);
+            } catch {
+                last = null;
+            }
+        }
+
+        // 如果「同一個 videoId」在 3 秒內剛剛記錄過，就不要再記一次
+        if (
+            last &&
+            last.videoId === currentVideo.id &&
+            now - last.timestamp < 3000
+        ) {
+            return;
+        }
+
+        // 更新 sessionStorage，代表這支影片剛被記錄過
+        window.sessionStorage.setItem(
+            storageKey,
+            JSON.stringify({ videoId: currentVideo.id, timestamp: now })
+        );
+
+        async function saveHistory() {
+            try {
+                await api.post("/users/watch-history", {
+                    video_id: currentVideo.id,
+                    duration_seconds: currentVideo.duration_seconds || null,
+                });
+            } catch (err) {
+                console.error("Failed to save watch history", err);
+            }
+        }
+
+        saveHistory();
+        // 只依賴 id，避免其他欄位變動也重跑
+    }, [currentVideo?.id, api]);
+    
     if (!currentVideo) {
         return (
             <div className="flex items-center justify-center h-full text-slate-400">
@@ -55,7 +106,6 @@ function VideoPlayerPanel({
             </div>
         );
     }
-
     return (
         <div className="flex flex-col gap-4">
             {/* 上半：播放器 + meta */}

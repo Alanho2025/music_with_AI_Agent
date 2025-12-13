@@ -22,7 +22,7 @@ function Sidebar() {
                     K-pop Hub
                 </p>
                 <p className="text-sm text-slate-400 mt-1">
-                    All your K-pop spaces in one place.
+                All your K-pop spaces in one place.
                 </p>
             </div>
 
@@ -122,7 +122,8 @@ function Sidebar() {
                     <span>🛒</span>
                     <span>Cart</span>
                 </NavLink>
-
+                {isAuthenticated && (
+                    <>
                 <NavLink
                     to="/playlists"
                     className={({ isActive }) => makeClasses(isActive)}
@@ -138,7 +139,10 @@ function Sidebar() {
                     <span>🧑</span>
                     <span>Personal Dashboard</span>
                 </NavLink>
+                    </>
+                )}
             </nav>
+            
 
             {/* admin navigation - only when logged in */}
             {isAuthenticated && isAdmin && (

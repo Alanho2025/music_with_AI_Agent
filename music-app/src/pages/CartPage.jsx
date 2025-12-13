@@ -4,6 +4,7 @@ import { useCart } from "../cart/CartContext";
 import { useNavigate } from "react-router-dom";
 import OrderSummaryCard from "../cart/OrderSummaryCard";
 import { calculateTotals } from "../cart/pricing";
+import { useAuth } from "../auth/AuthContext";
 
 function CartPage() {
     const {
@@ -15,7 +16,7 @@ function CartPage() {
         clearCart,
     } = useCart();
     const navigate = useNavigate();
-
+    const { isAuthenticated, login } = useAuth();
     const { shipping, grandTotal } = useMemo(
         () => calculateTotals(totalPrice),
         [totalPrice]
@@ -30,7 +31,14 @@ function CartPage() {
         if (next > maxStock) next = maxStock;
         updateQuantity(item.id, next);
     };
-
+    const handleCheckoutClick = () => {
+        if (!isAuthenticated) {
+            alert("please log in before checking out.");
+            login();            
+            return;
+        }
+        navigate("/checkout");
+    };
     if (!items.length) {
         return (
             <div className="px-4 md:px-8 py-8">
@@ -207,7 +215,7 @@ function CartPage() {
             >
                 <button
                     type="button"
-                    onClick={() => navigate("/checkout")}
+                    onClick={handleCheckoutClick}
                     className="w-full rounded-full bg-pink-500 text-xs font-semibold text-white py-2.5 hover:bg-pink-400"
                 >
                     Proceed to checkout

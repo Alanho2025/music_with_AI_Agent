@@ -6,43 +6,51 @@ import React, {
     useReducer,
     useEffect,
 } from "react";
+import { useAuth } from "../auth/AuthContext";
 
 const CartContext = createContext(null);
 
-const CART_STORAGE_KEY = "kpophub_cart_v1";
+// 共用的清洗邏輯
+function normalizeItems(items) {
+    if (!Array.isArray(items)) return [];
 
-function loadInitialCart() {
-    if (typeof window === "undefined") return { items: [] };
+    return items.map((i) => ({
+        ...i,
+        quantity: Number(i.quantity) || 1,
+        price_nzd:
+            i.price_nzd !== null && i.price_nzd !== undefined
+                ? Number(i.price_nzd)
+                : 0,
+        stock:
+            i.stock !== null && i.stock !== undefined
+                ? Number(i.stock)
+                : null,
+    }));
+}
+
+function loadCartFromStorage(key) {
+    if (typeof window === "undefined") return [];
 
     try {
-        const raw = window.localStorage.getItem(CART_STORAGE_KEY);
-        if (!raw) return { items: [] };
-
+        const raw = window.localStorage.getItem(key);
+        if (!raw) return [];
         const parsed = JSON.parse(raw);
-        if (!parsed || !Array.isArray(parsed.items)) return { items: [] };
-
-        return {
-            items: parsed.items.map((i) => ({
-                ...i,
-                quantity: Number(i.quantity) || 1,
-                price_nzd:
-                    i.price_nzd !== null && i.price_nzd !== undefined
-                        ? Number(i.price_nzd)
-                        : 0,
-                stock:
-                    i.stock !== null && i.stock !== undefined
-                        ? Number(i.stock)
-                        : null,
-            })),
-        };
+        return normalizeItems(parsed.items);
     } catch (err) {
         console.warn("Failed to load cart from localStorage", err);
-        return { items: [] };
+        return [];
     }
 }
 
 function cartReducer(state, action) {
     switch (action.type) {
+        case "SET_ALL": {
+            return {
+                ...state,
+                items: normalizeItems(action.payload),
+            };
+        }
+
         case "ADD_ITEM": {
             const { album, quantity } = action.payload;
             const existing = state.items.find((i) => i.id === album.id);
@@ -105,25 +113,44 @@ function cartReducer(state, action) {
 }
 
 export function CartProvider({ children }) {
-    // ✅ 用 lazy init，第一次就從 localStorage 載入
-    const [state, dispatch] = useReducer(
-        cartReducer,
-        undefined,
-        loadInitialCart
-    );
+    // 一開始先給一個空 state，後面用 effect 依照登入狀態載入
+    const [state, dispatch] = useReducer(cartReducer, { items: [] });
+    const { isAuthenticated, profile } = useAuth();
 
-    // ✅ 每次 items 變化就寫回 localStorage
+    // TODO: 這裡要換成你實際的 user id 欄位
+    const userId = profile?.id; // 例如 profile.user_id / profile.sub 都可以
+
+    // 🔁 根據登入狀態 / userId 載入對應的 cart
     useEffect(() => {
         if (typeof window === "undefined") return;
+
+        if (isAuthenticated && userId) {
+            const key = `kpophub_cart_user_${userId}_v1`;
+
+            const items = loadCartFromStorage(key);
+            dispatch({ type: "SET_ALL", payload: items });
+        } else {
+            // 未登入 → 清空 cart（每次回到未登入狀態都從空開始）
+            dispatch({ type: "CLEAR" });
+        }
+    }, [isAuthenticated, userId]);
+
+    // 💾 登入狀態下，items 每次變化就寫回該 user 的 cart
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        if (!isAuthenticated || !userId) return;
+
+        const key = `kpophub_cart_user_${userId}_v1`;
+
         try {
             window.localStorage.setItem(
-                CART_STORAGE_KEY,
+                key,
                 JSON.stringify({ items: state.items })
             );
         } catch (err) {
             console.warn("Failed to save cart to localStorage", err);
         }
-    }, [state.items]);
+    }, [state.items, isAuthenticated, userId]);
 
     const value = useMemo(
         () => ({

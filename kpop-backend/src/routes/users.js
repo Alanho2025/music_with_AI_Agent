@@ -90,7 +90,7 @@ router.get("/profile", async (req, res) => {
         const profile = {
             id: row.id,
             username: row.username,
-            email: row.email,                       // 你之前 username 本來就是 email
+            email: row.email,                       
             display_name: row.display_name,
             nickname: row.nickname,
             bio: row.bio,
@@ -131,39 +131,51 @@ router.put("/profile", async (req, res) => {
 // ------------------------------
 router.get("/watch-history", async (req, res) => {
     try {
-        const rawUserId = req.auth.sub;
         const { days, group_id, idol_id } = req.query;
-
-        // 現在 user_id 欄位是 INTEGER，但 Keycloak 給的是 UUID（字串）
-        // 短期先擋掉「不是數字」的 case，直接回空陣列，避免 Postgres 爆型別錯
-        if (isNaN(Number(rawUserId))) {
-            return res.json([]);
-        }
-
         const userId = req.user.id;
 
         let filter = "WHERE wh.user_id = $1";
         const params = [userId];
         let idx = 2;
 
+        // days 避免 SQL injection，轉成 int 再當參數
         if (days) {
-            filter += ` AND wh.watched_at >= NOW() - INTERVAL '${days} days'`;
+            const daysInt = parseInt(days, 10);
+            if (!Number.isNaN(daysInt) && daysInt > 0) {
+                filter += ` AND wh.watched_at >= NOW() - $${idx} * INTERVAL '1 day'`;
+                params.push(daysInt);
+                idx++;
+            }
         }
+
         if (group_id) {
-            filter += ` AND v.group_id = $${idx++}`;
+            filter += ` AND v.group_id = $${idx}`;
             params.push(group_id);
+            idx++;
         }
+
         if (idol_id) {
-            filter += ` AND v.idol_id = $${idx++}`;
+            filter += ` AND v.idol_id = $${idx}`;
             params.push(idol_id);
+            idx++;
         }
 
         const result = await db.query(
-            `SELECT wh.id, wh.watched_at, v.id AS video_id, v.title, v.thumbnail_url
-         FROM watch_history wh
-         JOIN videos v ON v.id = wh.video_id
-         ${filter}
-         ORDER BY wh.watched_at DESC`,
+            `
+            SELECT
+                wh.id,
+                wh.watched_at,
+                wh.duration_seconds,
+                v.id         AS video_id,
+                v.title,
+                v.thumbnail_url,
+                v.youtube_id,
+                v.group_id
+            FROM watch_history wh
+            JOIN videos v ON v.id = wh.video_id
+            ${filter}
+            ORDER BY wh.watched_at DESC
+            `,
             params
         );
 
@@ -176,12 +188,20 @@ router.get("/watch-history", async (req, res) => {
   
 // DELETE single record
 router.delete("/watch-history/:id", async (req, res) => {
-    const userId = req.auth.sub;
-    await db.query(
-        `DELETE FROM watch_history WHERE id = $1 AND user_id = $2`,
-        [req.params.id, userId]
-    );
-    res.json({ success: true });
+    try {
+        const userId = req.user.id;
+        const { id } = req.params;
+
+        await db.query(
+            `DELETE FROM watch_history WHERE id = $1 AND user_id = $2`,
+            [id, userId]
+        );
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error("DELETE /users/watch-history/:id error", err);
+        res.status(500).json({ error: "Failed to delete watch history" });
+    }
 });
 // ------------------------------
 // 4. Search History

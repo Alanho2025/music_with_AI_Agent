@@ -15,6 +15,7 @@ const importRoutes = require("./src/routes/importRoutes");
 const adminAlbumsRouter = require("./src/routes/adminAlbums");
 const storeAlbumsRouter = require("./src/routes/storeAlbums");
 const userRoutes = require("./src/routes/users");
+const watchHistoryRouter = require("./src/routes/watchHistory");
 const app = express();
 
 app.use(
@@ -36,6 +37,7 @@ app.use("/api/videos", videosRouter);
 
 // protected
 app.use("/api/playlists", verifyToken, attachUser, playlistsRouter);
+app.use("/api/users/watch-history", verifyToken, attachUser, watchHistoryRouter);
 app.use(
   "/api/admin/videos",
   verifyToken,

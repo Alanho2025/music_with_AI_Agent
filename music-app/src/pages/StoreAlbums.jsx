@@ -1,11 +1,10 @@
 // src/pages/StoreAlbums.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import { useSecureApi } from "../api/secureClient";
+import api from "../api/client";
 import AlbumFilters from "../components/store/AlbumFilters";
 import AlbumCard from "../components/store/AlbumCard";
 
 function StoreAlbums() {
-    const api = useSecureApi();
 
     const [albums, setAlbums] = useState([]);
     const [initialLoading, setInitialLoading] = useState(true);
@@ -22,7 +21,7 @@ function StoreAlbums() {
 
         async function load() {
             try {
-                const res = await api.get("/admin/albums");
+                const res = await api.get("/albums");
                 if (cancelled) return;
                 const raw = res.data || [];
 

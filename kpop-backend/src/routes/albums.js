@@ -103,4 +103,63 @@ router.get("/:albumId/tracks", async (req, res) => {
         res.status(500).json({ error: "Failed to load tracks" });
     }
 });
+router.get("/", async (req, res) => {
+    try {
+        const result = await db.query(
+            `SELECT a.id,
+                    a.title,
+                    a.release_date,
+                    a.country,
+                    a.sales,
+                    a.peak_chart,
+                    a.img_url,
+                    a.group_id,
+                    a.price_nzd,
+                    a.stock,
+                    g.name AS group_name
+             FROM albums a
+             LEFT JOIN groups g ON a.group_id = g.id
+             ORDER BY g.name ASC NULLS LAST, a.release_date ASC NULLS LAST, a.title ASC`
+        );
+
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Failed to fetch albums list", err);
+        res.status(500).json({ error: "Failed to fetch albums list" });
+    }
+});
+
+// 取得單一 album
+router.get("/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const result = await db.query(
+            `SELECT a.id,
+                    a.group_id,
+                    a.title,
+                    a.release_date,
+                    a.country,
+                    a.sales,
+                    a.peak_chart,
+                    a.img_url,
+                    a.price_nzd,
+                    a.stock,
+                    g.name AS group_name
+             FROM albums a
+             LEFT JOIN groups g ON a.group_id = g.id
+             WHERE a.id = $1`,
+            [id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "Album not found" });
+        }
+
+        res.json({ album: result.rows[0] });
+    } catch (err) {
+        console.error("Failed to fetch album detail", err);
+        res.status(500).json({ error: "Failed to fetch album detail" });
+    }
+});
 module.exports = router;
