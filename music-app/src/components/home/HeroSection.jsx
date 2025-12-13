@@ -1,6 +1,5 @@
 // src/components/home/HeroSection.jsx
 import React from "react";
-import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useSecureApi } from "../../api/secureClient";
 
@@ -12,14 +11,29 @@ export default function HeroSection({ displayName }) {
     const [heroPosY, setHeroPosY] = useState(50);
 
     useEffect(() => {
+        let isMounted = true;
         async function load() {
-            const res = await secureApi.get("/users/me/hero-background");
-            setHeroBg(res.data.url);
-            setHeroPosX(res.data.posX ?? 50);
-            setHeroPosY(res.data.posY ?? 50);
+            try {
+                const res = await secureApi.get("/users/me/hero-background");
+                if (!isMounted) return;
+
+                const data = res.data || {};
+                setHeroBg(data.url || null);
+                setHeroPosX(data.posX ?? 50);
+                setHeroPosY(data.posY ?? 50);
+            } catch (err) {
+                if (err.response?.status === 401) {
+                    console.warn("Not authenticated, using default hero gradient");
+                } else {
+                    console.error("Failed to load hero background", err);
+                }
+            }
         }
         load();
-    }, []);
+        return () => {
+            isMounted = false;
+        };
+    }, [secureApi]);
     return (
         <div className="rounded-[32px] overflow-hidden shadow-lg">
 

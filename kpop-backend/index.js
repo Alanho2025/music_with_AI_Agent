@@ -59,8 +59,7 @@ app.use(
 );
 app.use("/api/import", importRoutes);
 app.use("/api/store/albums", storeAlbumsRouter);
-app.use("/api/users", verifyToken,
-  attachUser, userRoutes);
+app.use("/api/users", verifyToken,attachUser, userRoutes);
 const PORT = 8080;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
