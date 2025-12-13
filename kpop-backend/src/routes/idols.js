@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const db = require("../../db");
 const { verifyToken } = require("../middlewares/auth");
+const { attachUser } = require("../middlewares/user");
+
 // GET all idols
 router.get("/", async (req, res) => {
     try {
@@ -42,28 +44,25 @@ router.get("/featured", async (req, res) => {
     }
 });
 
-// 你之前 playlists 用過的 getUserId 可以抽成 util 共用
-function getUserId(req) {
-    if (req.auth && req.auth.sub) {
-        // TODO: 對接 users table，現在先硬編 1
-    }
-    return 1;
-}
+
 
 // 取得目前使用者有沒有訂閱這個 idol
-router.get("/:id/subscription", verifyToken, async (req, res) => {
+router.get("/:id/subscription", verifyToken, attachUser, async (req, res) => {
     try {
-        const userId = getUserId(req);
+        const userId = req.user.id;
         const { id: idolId } = req.params;
 
         const result = await db.query(
-            `SELECT 1 
-             FROM idol_subscriptions 
+            `SELECT notify 
+             FROM idols_subscriptions 
              WHERE user_id = $1 AND idol_id = $2`,
             [userId, idolId]
         );
 
-        res.json({ subscribed: result.rows.length > 0 });
+        res.json({
+            subscribed: result.rows.length > 0,
+            notify: result.rows[0]?.notify ?? false
+        });
     } catch (err) {
         console.error("GET /api/idols/:id/subscription error:", err);
         res.status(500).json({ error: "Failed to fetch subscription" });
@@ -71,19 +70,20 @@ router.get("/:id/subscription", verifyToken, async (req, res) => {
 });
 
 // 訂閱
-router.post("/:id/subscribe", verifyToken, async (req, res) => {
+router.post("/:id/subscribe", verifyToken, attachUser, async (req, res) => {
     try {
-        const userId = getUserId(req);
+        const userId = req.user.id;
         const { id: idolId } = req.params;
 
         await db.query(
-            `INSERT INTO idol_subscriptions (user_id, idol_id)
-             VALUES ($1, $2)
-             ON CONFLICT (user_id, idol_id) DO NOTHING`,
+            `INSERT INTO idols_subscriptions (user_id, idol_id, notify)
+             VALUES ($1, $2, TRUE)
+             ON CONFLICT (user_id, idol_id)
+             DO UPDATE SET notify = TRUE`,   // 如果已存在就恢復通知
             [userId, idolId]
         );
 
-        res.status(201).json({ subscribed: true });
+        res.status(201).json({ subscribed: true, notify: true });
     } catch (err) {
         console.error("POST /api/idols/:id/subscribe error:", err);
         res.status(500).json({ error: "Failed to subscribe" });
@@ -91,13 +91,13 @@ router.post("/:id/subscribe", verifyToken, async (req, res) => {
 });
 
 // 取消訂閱
-router.delete("/:id/subscribe", verifyToken, async (req, res) => {
+router.delete("/:id/subscribe", verifyToken, attachUser, async (req, res) => {
     try {
-        const userId = getUserId(req);
+        const userId = req.user.id;
         const { id: idolId } = req.params;
 
         await db.query(
-            `DELETE FROM idol_subscriptions 
+            `DELETE FROM idols_subscriptions
              WHERE user_id = $1 AND idol_id = $2`,
             [userId, idolId]
         );

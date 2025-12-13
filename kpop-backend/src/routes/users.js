@@ -79,7 +79,7 @@ router.get("/profile", async (req, res) => {
         const statsRes = await db.query(
             `SELECT 
             (SELECT COUNT(*) FROM watch_history WHERE user_id = $1) AS watch_count,
-            (SELECT COUNT(*) FROM user_follow_idols WHERE user_id = $1) AS idol_follow_count,
+            (SELECT COUNT(*) FROM idol_subscriptions WHERE user_id = $1) AS idol_follow_count,
             (SELECT COUNT(*) FROM user_follow_groups WHERE user_id = $1) AS group_follow_count,
             (SELECT COUNT(*) FROM playlists WHERE user_id = $1) AS playlist_count`,
             [userId]
@@ -309,6 +309,8 @@ router.put("/preferences", async (req, res) => {
 // ------------------------------
 router.get("/subscriptions", async (req, res) => {
     try {
+        const userId = req.user.id;
+
         res.json({
             idols: [],
             groups: [],
