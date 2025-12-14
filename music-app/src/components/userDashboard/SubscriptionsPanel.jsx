@@ -7,16 +7,16 @@ export default function SubscriptionsPanel({ subs }) {
         {idols.map((i) => (
           <Item
             key={i.idol_id}
-            img={i.profile_img_url}
-            title={i.name}
+            img={i.image_url}
+            title={i.stage_name}
             desc={i.group_name}
           />
         ))}
       </Section>
 
-      <Section title="Favorite Albums">
-        {albums.map((a) => (
-          <Item key={a.album_id} img={a.img_url} title={a.title} />
+      <Section title="Favorite Groups">
+        {groups.map((a) => (
+          <Item key={a.id} img={a.group_img_url} title={a.group_name} />
         ))}
       </Section>
     </div>

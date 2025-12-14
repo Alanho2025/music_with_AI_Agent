@@ -310,10 +310,31 @@ router.put("/preferences", async (req, res) => {
 router.get("/subscriptions", async (req, res) => {
     try {
         const userId = req.user.id;
+        const idolSubs = await db.query(
+            `
+            SELECT i.id, i.stage_name, i.image_url,i.group_id, g.name AS group_name
+            FROM idol_subscriptions s
+            JOIN idols i ON s.idol_id = i.id
+            LEFT JOIN groups g ON i.group_id = g.id
+            WHERE s.user_id = $1
+            ORDER BY i.stage_name ASC
+            `,
+            [userId]
+          );
+        const groupSubs = await db.query(
+            `
+            SELECT g.id, g.name AS group_name, g.group_img_url
+            FROM user_follow_groups s
+            JOIN groups g ON s.group_id = g.id
+            WHERE s.user_id = $1
+            ORDER BY g.name ASC
+            `,
+            [userId]
+        );
 
         res.json({
-            idols: [],
-            groups: [],
+            idols: idolSubs.rows,
+            groups: groupSubs.rows,
             albums: [],
             playlists: [],
         });

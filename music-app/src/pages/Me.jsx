@@ -5,14 +5,12 @@ import { useSecureApi } from '../api/secureClient';
 //import { useNavigate } from 'react-router-dom';
 import ProfileCard from '../components/userDashboard/ProfileCard';
 import HistoryTabs from '../components/userDashboard/HistoryTabs';
-import PreferencesPanel from '../components/userDashboard/PreferencesPanel';
 import SubscriptionsPanel from '../components/userDashboard/SubscriptionsPanel';
 
 function Me() {
   const secureApi = useSecureApi();
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState({});
-  const [prefs, setPrefs] = useState(null);
   const [subs, setSubs] = useState(null);
 
   const [loading, setLoading] = useState(true);
@@ -27,9 +25,8 @@ function Me() {
         setLoading(true);
         setError(null);
 
-        const [profileRes, prefsRes, subsRes] = await Promise.all([
+        const [profileRes, subsRes] = await Promise.all([
           secureApi.get('/users/profile'),
-          secureApi.get('/users/preferences'),
           secureApi.get('/users/subscriptions'),
         ]);
 
@@ -37,20 +34,6 @@ function Me() {
 
         setProfile(profileRes.data.profile);
         setStats(profileRes.data.stats || {});
-
-        setPrefs(
-          prefsRes.data || {
-            home_banner_mode: 'latest',
-            pref_girl_group: false,
-            pref_boy_group: false,
-            pref_solo: false,
-            pref_gen3: false,
-            pref_gen4: false,
-            notif_new_album: true,
-            notif_new_mv: true,
-            notif_playlist_update: true,
-          }
-        );
 
         setSubs(
           subsRes.data || {
@@ -77,6 +60,7 @@ function Me() {
     return () => {
       isMounted = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 狀態渲染
@@ -106,20 +90,6 @@ function Me() {
 
         <div className="mt-6">
           <HistoryTabs />
-        </div>
-
-        <div className="mt-6">
-          <PreferencesPanel
-            prefs={prefs}
-            refresh={async () => {
-              try {
-                const res = await secureApi.get('/users/preferences');
-                setPrefs(res.data);
-              } catch (err) {
-                console.error('Failed to reload preferences', err);
-              }
-            }}
-          />
         </div>
 
         <div className="mt-6">
