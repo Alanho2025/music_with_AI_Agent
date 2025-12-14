@@ -1,21 +1,21 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import Groups from "./pages/Groups";
-import GroupTimelinePage from "./pages/GroupTimelinePage";
-import Idols from "./pages/Idols";
-import Me from "./pages/Me";
-import Sidebar from "./components/Sidebar";
-import AdminVideos from "./pages/AdminVideos";
-import AdminIdols from "./pages/AdminIdols";
-import AdminHtmlImport from "./pages/AdminHtmlImport";
-import AdminAlbums from "./pages/AdminAlbums";
-import MusicPlayer from "./pages/MusicPlayer";
-import Albums from "./pages/StoreAlbums";
-import CartPage from "./pages/CartPage";
-import Playlist from "./pages/Playlist";
-import CheckoutPage from "./pages/CheckoutPage";
-import HeroBackgroundEditor from "./pages/settings/sections/HeroBackgroundEditor";
-import SettingsPage from "./pages/settings/SettingsPage"; 
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import Groups from './pages/Groups';
+import GroupTimelinePage from './pages/GroupTimelinePage';
+import Idols from './pages/Idols';
+import Me from './pages/Me';
+import Sidebar from './components/Sidebar';
+import AdminVideos from './pages/AdminVideos';
+import AdminIdols from './pages/AdminIdols';
+import AdminHtmlImport from './pages/AdminHtmlImport';
+import AdminAlbums from './pages/AdminAlbums';
+import MusicPlayer from './pages/MusicPlayer';
+import Albums from './pages/StoreAlbums';
+import CartPage from './pages/CartPage';
+import Playlist from './pages/Playlist';
+import CheckoutPage from './pages/CheckoutPage';
+import HeroBackgroundEditor from './pages/settings/sections/HeroBackgroundEditor';
+import SettingsPage from './pages/settings/SettingsPage';
 function App() {
   return (
     <BrowserRouter>
@@ -42,7 +42,6 @@ function App() {
             <Route path="/admin/albums" element={<AdminAlbums />} />
           </Routes>
         </main>
-        
       </div>
     </BrowserRouter>
   );

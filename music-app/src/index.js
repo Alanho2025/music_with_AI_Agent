@@ -2,11 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import { AuthProvider } from "./auth/AuthContext";
+import { AuthProvider } from './auth/AuthContext';
 import reportWebVitals from './reportWebVitals';
 import { CartProvider } from './cart/CartContext';
 
-ReactDOM.createRoot(document.getElementById("root")).render(
+ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AuthProvider>
       <CartProvider>

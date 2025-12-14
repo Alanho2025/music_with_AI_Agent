@@ -54,7 +54,7 @@ router.get("/:id/subscription", verifyToken, attachUser, async (req, res) => {
 
         const result = await db.query(
             `SELECT notify 
-             FROM idols_subscriptions 
+             FROM idol_subscriptions 
              WHERE user_id = $1 AND idol_id = $2`,
             [userId, idolId]
         );
@@ -97,7 +97,7 @@ router.delete("/:id/subscribe", verifyToken, attachUser, async (req, res) => {
         const { id: idolId } = req.params;
 
         await db.query(
-            `DELETE FROM idols_subscriptions
+            `DELETE FROM idol_subscriptions
              WHERE user_id = $1 AND idol_id = $2`,
             [userId, idolId]
         );
