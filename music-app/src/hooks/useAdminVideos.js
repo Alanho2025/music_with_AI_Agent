@@ -43,6 +43,7 @@ export function useAdminVideos({ secureApi, isAuthenticated }) {
     const resetForm = () => {
         setSelectedVideoId(null);
         setForm(EMPTY_FORM);
+        setYoutubeUrl("");
     };
 
     // keep latest secureApi in a ref so that we do not need to depend on it
@@ -232,7 +233,7 @@ export function useAdminVideos({ secureApi, isAuthenticated }) {
 
         setSelectedVideoId(video.id);
         setForm({
-            group_id: video.group_id || "", 
+            group_id: video.group_id || "",
             album_id: video.album_id || "",
             title: video.title || "",
             youtube_id: video.youtube_id || "",
