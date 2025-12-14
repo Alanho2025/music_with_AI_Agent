@@ -8,6 +8,7 @@ import { useAdminVideos } from "../hooks/useAdminVideos";
 
 import ExistingVideosPanel from "../components/admin/videos/ExistingVideosPanel";
 import VideoFormPanel from "../components/admin/videos/VideoFormPanel";
+import AdminSectionHeader from "../components/admin/AdminSectionHeader";
 
 function AdminVideos() {
     const { isAuthenticated } = useAuth();
@@ -49,7 +50,7 @@ function AdminVideos() {
             </div>
         );
     }
-    
+
 
     const {
         videos,
@@ -89,17 +90,15 @@ function AdminVideos() {
     return (
         <div className="flex flex-col gap-6 w-full px-8">
             {/* header */}
-            <header>
-                <h1 className="text-2xl font-bold tracking-tight">Admin - Videos</h1>
-                <p className="text-sm text-slate-400 mt-1">
-                    Paste a YouTube URL, fetch metadata, tweak fields, and save into your
-                    PostgreSQL database. Manage existing songs on the left.
-                </p>
-            </header>
+            <AdminSectionHeader
+                title="Videos"
+                subtitle="Manage videos from Youtube for your K-pop hub."
+            />
+
 
             {/* layout: left existing songs + right fetch/form */}
             <section className="bg-slate-900 rounded-xl p-4 grid grid-cols-1 lg:grid-cols-[1.2fr,1.8fr] gap-6">
-               
+
 
                 <VideoFormPanel
                     groups={groups}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../api/client";
+import api from "../../api/client";
 
 function GroupList() {
     const [groups, setGroups] = useState([]);

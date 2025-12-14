@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../api/client";
+import api from "../../api/client";
 import { useNavigate } from "react-router-dom";
 export default function AlbumDetailPanel({ album }) {
     const [tracks, setTracks] = useState([]);

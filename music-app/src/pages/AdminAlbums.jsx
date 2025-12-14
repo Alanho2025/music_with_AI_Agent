@@ -1,9 +1,10 @@
 // src/pages/AdminAlbums.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useSecureApi } from "../api/secureClient";
-import AlbumList from "../components/admin/AlbumList";
-import AlbumForm from "../components/admin/AlbumForm";
-
+import AlbumList from "../components/admin/album/AlbumList";
+import AlbumForm from "../components/admin/album/AlbumForm";
+import AlbumToolbar from "../components/admin/album/AlbumToolbar";
+import AdminSectionHeader from "../components/admin/AdminSectionHeader";
 function AdminAlbums() {
     const api = useSecureApi();
 
@@ -15,6 +16,14 @@ function AdminAlbums() {
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState(null);
     const [groups, setGroups] = useState([]);
+
+    const [filters, setFilters] = useState({
+        groupId: "",
+        country: "",
+        releaseFrom: "",
+        releaseTo: "",
+    });
+
     // load albums list
     useEffect(() => {
         let cancelled = false;
@@ -68,20 +77,61 @@ function AdminAlbums() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedId]);
 
-    // filter list
+    // countries 給下拉選單用
+    const countries = useMemo(() => {
+        const set = new Set();
+        albums.forEach((a) => {
+            if (a.country) set.add(a.country);
+        });
+        return Array.from(set).sort();
+    }, [albums]);
+
+    // filter list (search + group + country + release_date)
     const filteredAlbums = useMemo(() => {
         const term = search.trim().toLowerCase();
-        if (!term) return albums;
-        return albums.filter((a) =>
-            [a.title, a.group_name]
-                .filter(Boolean)
-                .join(" ")
-                .toLowerCase()
-                .includes(term)
-        );
-    }, [albums, search]);
 
-    // change handler
+        return albums.filter((a) => {
+            // text search: title + group_name
+            if (term) {
+                const haystack = [a.title, a.group_name]
+                    .filter(Boolean)
+                    .join(" ")
+                    .toLowerCase();
+
+                if (!haystack.includes(term)) {
+                    return false;
+                }
+            }
+
+            // group filter
+            if (filters.groupId && String(a.group_id) !== String(filters.groupId)) {
+                return false;
+            }
+
+            // country filter
+            if (filters.country && a.country !== filters.country) {
+                return false;
+            }
+
+            // release date range
+            if (a.release_date) {
+                const albumDate = new Date(a.release_date);
+
+                if (filters.releaseFrom) {
+                    const from = new Date(filters.releaseFrom);
+                    if (albumDate < from) return false;
+                }
+
+                if (filters.releaseTo) {
+                    const to = new Date(filters.releaseTo);
+                    if (albumDate > to) return false;
+                }
+            }
+
+            return true;
+        });
+    }, [albums, search, filters]);
+    // change handler for form
     const handleAlbumChange = (field, value) => {
         setAlbum((prev) => ({
             ...prev,
@@ -166,25 +216,37 @@ function AdminAlbums() {
     }, [status]);
 
     return (
-        <div className="flex gap-4">
-            <AlbumList
-                albums={filteredAlbums}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
+        <div className="flex flex-col gap-4">
+            <AdminSectionHeader
+                title="Albums"
+                subtitle="Manage album metadata, pricing, stock, and cover art for your K-pop hub."
+            />
+            <AlbumToolbar
                 search={search}
                 onSearchChange={setSearch}
                 onCreate={handleCreateNew}
+                filters={filters}
+                onFilterChange={setFilters}
+                groups={groups}
+                countries={countries}
             />
 
-            <AlbumForm
-                loading={loading}
-                album={album}
-                saving={saving}
-                status={status}
-                onChange={handleAlbumChange}
-                onSave={handleSave}
-                groups={groups}
-            />
+            <div className="flex gap-4">
+                <AlbumList
+                    albums={filteredAlbums}
+                    selectedId={selectedId}
+                    onSelect={setSelectedId}
+                />
+                <AlbumForm
+                    loading={loading}
+                    album={album}
+                    saving={saving}
+                    status={status}
+                    onChange={handleAlbumChange}
+                    onSave={handleSave}
+                    groups={groups}
+                />
+            </div>
         </div>
     );
 }

@@ -1,8 +1,10 @@
 // src/pages/AdminIdols.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useSecureApi } from "../api/secureClient";
-import IdolList from "../components/admin/IdolList";
-import IdolForm from "../components/admin/IdolForm";
+import IdolList from "../components/admin/idols/IdolList";
+import IdolForm from "../components/admin/idols/IdolForm";
+import AdminSectionHeader from "../components/admin/AdminSectionHeader";
+import IdolToolbar from "../components/admin/idols/IdolToolbar";
 
 function AdminIdols() {
     const api = useSecureApi();
@@ -14,6 +16,15 @@ function AdminIdols() {
     const [saving, setSaving] = useState(false);
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState(null);
+
+    // filters: group, birthdate range, image_url null or not
+    const [filters, setFilters] = useState({
+        group: "",
+        birthFrom: "",
+        birthTo: "",
+        imageStatus: "all", // "all" | "with" | "without"
+    });
+
     // 1) 載入 idol list
     useEffect(() => {
         let cancelled = false;
@@ -71,18 +82,62 @@ function AdminIdols() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedId]);
 
-    // 3) filter list
+    // groups for toolbar select
+    const groupOptions = useMemo(() => {
+        const set = new Set();
+        idols.forEach((i) => {
+            if (i.group_name) set.add(i.group_name);
+        });
+        return Array.from(set).sort();
+    }, [idols]);
+
+    // 3) filter list: search + filters
     const filteredIdols = useMemo(() => {
         const term = search.trim().toLowerCase();
-        if (!term) return idols;
-        return idols.filter((i) =>
-            [i.stage_name, i.group_name, i.position]
-                .filter(Boolean)
-                .join(" ")
-                .toLowerCase()
-                .includes(term)
-        );
-    }, [idols, search]);
+
+        return idols.filter((i) => {
+            // search
+            if (term) {
+                const haystack = [i.stage_name, i.group_name, i.position]
+                    .filter(Boolean)
+                    .join(" ")
+                    .toLowerCase();
+
+                if (!haystack.includes(term)) {
+                    return false;
+                }
+            }
+
+            // group filter (by group_name)
+            if (filters.group && i.group_name !== filters.group) {
+                return false;
+            }
+
+            // image_url null or not
+            if (filters.imageStatus === "with" && !i.image_url) {
+                return false;
+            }
+            if (filters.imageStatus === "without" && i.image_url) {
+                return false;
+            }
+
+            // birthdate range
+            if (i.birthdate) {
+                const birth = new Date(i.birthdate);
+
+                if (filters.birthFrom) {
+                    const from = new Date(filters.birthFrom);
+                    if (birth < from) return false;
+                }
+                if (filters.birthTo) {
+                    const to = new Date(filters.birthTo);
+                    if (birth > to) return false;
+                }
+            }
+
+            return true;
+        });
+    }, [idols, search, filters]);
 
     // 4) handlers，往下丟給子元件用
     const handleIdolChange = (field, value) => {
@@ -137,18 +192,19 @@ function AdminIdols() {
             await api.put(`/admin/idols/${selectedId}`, form);
             setStatus({
                 type: "success",
-                message: "modified idol saved.",
+                message: "Modified idol saved.",
             });
         } catch (err) {
             console.error(err);
             setStatus({
                 type: "error",
-                message: "saved failed",
+                message: "Save failed.",
             });
         } finally {
             setSaving(false);
         }
     };
+
     useEffect(() => {
         if (!status) return;
         const timer = setTimeout(() => setStatus(null), 3000);
@@ -156,26 +212,43 @@ function AdminIdols() {
     }, [status]);
 
     return (
-        <div className="flex gap-4">
-            <IdolList
-                idols={filteredIdols}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
-                search={search}
-                onSearchChange={setSearch}
+        <div className="flex flex-col gap-4">
+            <AdminSectionHeader
+                title="Idols"
+                subtitle="Manage idol profiles, birthdays, groups, and gallery images."
             />
 
-            <IdolForm
-                loading={loading}
-                form={form}
-                saving={saving}
-                status={status}
-                onIdolChange={handleIdolChange}
-                onImageChange={handleImageChange}
-                onAddImage={handleAddImage}
-                onRemoveImage={handleRemoveImage}
-                onSave={handleSave}
+            <IdolToolbar
+                search={search}
+                onSearchChange={setSearch}
+                filters={filters}
+                onFilterChange={setFilters}
+                groups={groupOptions}
             />
+
+            <div className="flex gap-4">
+                <IdolList
+                    idols={filteredIdols}
+                    selectedId={selectedId}
+                    onSelect={setSelectedId}
+                // 如果你不想在 IdolList 裡再顯示搜尋框，可以把下面兩行從 IdolList 裡移除
+                // 並且這裡不再傳 search / onSearchChange
+                // search={search}
+                // onSearchChange={setSearch}
+                />
+
+                <IdolForm
+                    loading={loading}
+                    form={form}
+                    saving={saving}
+                    status={status}
+                    onIdolChange={handleIdolChange}
+                    onImageChange={handleImageChange}
+                    onAddImage={handleAddImage}
+                    onRemoveImage={handleRemoveImage}
+                    onSave={handleSave}
+                />
+            </div>
         </div>
     );
 }

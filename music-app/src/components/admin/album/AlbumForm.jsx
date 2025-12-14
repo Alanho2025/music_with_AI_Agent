@@ -176,6 +176,19 @@ function AlbumForm({ loading, album, saving, status, onChange, onSave, groups = 
                         }
                     />
                 </div>
+                {/* Summary */}
+                <div className="md:col-span-2">
+                    <label className="mb-1 block text-xs text-slate-400">
+                        Summary
+                    </label>
+                    <textarea
+                        value={album?.summary || ""}
+                        onChange={(e) => onChange("summary", e.target.value)}
+                        rows={4}
+                        className="w-full resize-none rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100"
+                        placeholder="Write some background about this album, concept, era, or promotions."
+                    />
+                </div>
                 {/* Album cover URL */}
                 <div className="md:col-span-2">
                     <label className="text-xs text-slate-400">
@@ -187,6 +200,7 @@ function AlbumForm({ loading, album, saving, status, onChange, onSave, groups = 
                         onChange={(e) => onChange("img_url", e.target.value)}
                     />
                 </div>
+
             </div>
 
             {album.img_url && (

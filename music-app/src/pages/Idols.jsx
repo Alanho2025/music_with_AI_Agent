@@ -1,4 +1,4 @@
-import IdolList from "../components/IdolList";
+import IdolList from "../components/idol/IdolList";
 
 function Idols() {
     return (

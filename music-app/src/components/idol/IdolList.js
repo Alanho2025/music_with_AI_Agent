@@ -1,7 +1,7 @@
 // src/components/IdolList.js
 import React, { useEffect, useMemo, useState } from "react";
-import api from "../api/client";
-import { useSecureApi } from "../api/secureClient";
+import api from "../../api/client";
+import { useSecureApi } from "../../api/secureClient";
 import IdolCard from "./IdolCard";
 import IdolDetailPanel from "./IdolDetailPanel";
 

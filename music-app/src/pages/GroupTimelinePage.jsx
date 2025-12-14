@@ -1,9 +1,9 @@
 // src/pages/GroupTimelinePage.jsx
 import { useParams } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
-import AlbumTimelineHorizontal from "../components/AlbumTimelineHorizontal";
-import AlbumDetailPanel from "../components/AlbumDetailPanel";
-import GroupSelector from "../components/GroupSelector";
+import AlbumTimelineHorizontal from "../components/album/AlbumTimelineHorizontal";
+import AlbumDetailPanel from "../components/album/AlbumDetailPanel";
+import GroupSelector from "../components/group/GroupSelector";
 import api from "../api/client";
 
 export default function GroupTimelinePage() {
