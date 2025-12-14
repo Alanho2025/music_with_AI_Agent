@@ -27,7 +27,6 @@ function VideoPlayerPanel({
 }) {
   const api = useSecureApi();
   const {
-    meta,
     metaLoading,
     liked,
     displayCompany,

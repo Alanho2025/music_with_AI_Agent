@@ -1,8 +1,8 @@
 // src/pages/Me.jsx
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+//import { Link } from 'react-router-dom';
 import { useSecureApi } from '../api/secureClient';
-import { useNavigate } from 'react-router-dom';
+//import { useNavigate } from 'react-router-dom';
 import ProfileCard from '../components/userDashboard/ProfileCard';
 import HistoryTabs from '../components/userDashboard/HistoryTabs';
 import PreferencesPanel from '../components/userDashboard/PreferencesPanel';

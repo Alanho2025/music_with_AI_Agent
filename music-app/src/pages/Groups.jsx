@@ -42,6 +42,7 @@ export default function Groups() {
     }
 
     loadFollows();
+    // eslint-disable-next-line
   }, []);
 
   const isFollowing = (groupId) => !!followMap[groupId];

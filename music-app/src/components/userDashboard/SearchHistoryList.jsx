@@ -1,18 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useSecureApi } from '../../api/secureClient';
+import { useCallback } from 'react';
 
 export default function SearchHistoryList() {
   const api = useSecureApi();
   const [items, setItems] = useState([]);
 
-  useEffect(() => {
-    load();
+  const load = useCallback(() => {
+    async function fetchData() {
+      const res = await api.get('/users/search-history');
+      setItems(res.data);
+    }
+    fetchData();
   }, []);
 
-  async function load() {
-    const res = await api.get('/users/search-history');
-    setItems(res.data);
-  }
+  useEffect(() => {
+    load();
+  }, [load]);
 
   async function clearAll() {
     await api.delete('/users/search-history');

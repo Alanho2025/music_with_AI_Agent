@@ -48,6 +48,7 @@ function Sidebar() {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line
   }, [isAuthenticated]);
   function handleNotificationClick() {
     navigate('/notifications');
