@@ -1,5 +1,5 @@
 // src/pages/GroupTimelinePage.jsx
-import { useParams } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
 import AlbumTimelineHorizontal from "../components/album/AlbumTimelineHorizontal";
 import AlbumDetailPanel from "../components/album/AlbumDetailPanel";
@@ -8,9 +8,19 @@ import api from "../api/client";
 
 export default function GroupTimelinePage() {
     const { id } = useParams();
+    const location = useLocation();
+    const navigate = useNavigate();
+
     const [groups, setGroups] = useState([]);
     const [albums, setAlbums] = useState([]);
     const [selectedAlbum, setSelectedAlbum] = useState(null);
+
+    // 解析 query string
+    const query = useMemo(
+        () => new URLSearchParams(location.search),
+        [location.search]
+    );
+    const albumIdFromUrl = query.get("album");
 
     useEffect(() => {
         api.get("/groups").then((res) => setGroups(res.data || []));
@@ -22,17 +32,34 @@ export default function GroupTimelinePage() {
             .get(`/groups/${id}/albums`)
             .then((res) => {
                 setAlbums(res.data || []);
-                setSelectedAlbum(null);
+                setSelectedAlbum(null); // 換 group 先清空，後面再用 query 帶入
             })
             .catch((err) => {
                 console.error("Failed to load albums timeline", err);
             });
     }, [id]);
 
+    // 當 albums 載入完，又有 ?album=xx 時，自動選中對應專輯
+    useEffect(() => {
+        if (!albumIdFromUrl || albums.length === 0) return;
+
+        const targetId = Number(albumIdFromUrl);
+        const found = albums.find((a) => a.id === targetId);
+        if (found) {
+            setSelectedAlbum(found);
+        }
+    }, [albumIdFromUrl, albums]);
+
     const currentGroup = useMemo(() => {
         const numericId = Number(id);
         return groups.find((g) => g.id === numericId);
     }, [groups, id]);
+
+    // 點時間軸的 album 時，同步更新網址
+    const handleSelectAlbum = (album) => {
+        setSelectedAlbum(album);
+        navigate(`/groups/${id}?album=${album.id}`);
+    };
 
     return (
         <div className="flex-1 min-h-screen bg-slate-950 px-4 py-6 md:px-6 lg:px-8">
@@ -66,7 +93,7 @@ export default function GroupTimelinePage() {
                             <div className="inline-flex min-w-max px-6 py-6">
                                 <AlbumTimelineHorizontal
                                     albums={albums}
-                                    onSelectAlbum={setSelectedAlbum}
+                                    onSelectAlbum={handleSelectAlbum}
                                     selectedAlbumId={selectedAlbum?.id}
                                 />
                             </div>

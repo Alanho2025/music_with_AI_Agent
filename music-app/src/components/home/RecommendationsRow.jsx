@@ -44,8 +44,10 @@ export default function RecommendationsRow({
                             key={item.id}
                             to={
                                 type === "video"
-                                    ? `/videos/${item.id}`
-                                    : `/albums/${item.id}`
+                                    ? `/music-player?youtube=${item.youtube_id}&title=${encodeURIComponent(
+                                        item.title
+                                    )}`
+                                    : `/groups/${item.group_id}?album=${item.id}`
                             }
                             className={cardClass}
                         >

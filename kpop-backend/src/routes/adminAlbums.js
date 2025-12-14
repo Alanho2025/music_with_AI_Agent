@@ -16,6 +16,7 @@ router.get("/", async (req, res) => {
                     a.group_id,
                     a.price_nzd,
                     a.stock,
+                    a.summary,
                     g.name AS group_name
              FROM albums a
              LEFT JOIN groups g ON a.group_id = g.id
@@ -45,6 +46,7 @@ router.get("/:id", async (req, res) => {
                     a.img_url,
                     a.price_nzd,
                     a.stock,
+                    a.summary,
                     g.name AS group_name
              FROM albums a
              LEFT JOIN groups g ON a.group_id = g.id

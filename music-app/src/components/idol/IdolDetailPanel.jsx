@@ -20,7 +20,41 @@ export default function IdolDetailPanel({
     const galleryImages = Array.isArray(rawGallery)
         ? rawGallery.filter((img) => img && img.image_url)
         : [];
+
+    // 新增欄位：MBTI + Instagram（多種欄位名稱相容）
+    const mbti =
+        idol.mbti ||
+        idol.MBTI ||
+        idol.mbti_type ||
+        null;
+
+    const instagramRaw =
+        idol.instagram ||
+        idol.instagram_handle ||
+        idol.instagram_url ||
+        null;
+
+    let instagramHandle = null;
+    let instagramLink = null;
+
+    if (instagramRaw) {
+        // 去掉前後空白
+        const trimmed = String(instagramRaw).trim();
+
+        // 如果已經是完整網址，就直接用
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+            instagramLink = trimmed;
+            instagramHandle = trimmed.replace(/^https?:\/\/(www\.)?instagram\.com\//, "").replace(/\/$/, "");
+        } else {
+            // 當成帳號處理（可能有 @ 或沒有）
+            const handle = trimmed.replace(/^@/, "");
+            instagramHandle = handle;
+            instagramLink = `https://instagram.com/${handle}`;
+        }
+    }
+
     console.log("idol detail:", idol);
+
     return (
         <div className="flex flex-col gap-4">
             {/* header */}
@@ -39,11 +73,13 @@ export default function IdolDetailPanel({
                     <h2 className="text-lg font-semibold text-slate-50">
                         {idol.stage_name}
                     </h2>
+
                     {idol.korean_name && (
                         <p className="text-xs text-slate-400 mt-1">
                             {idol.korean_name}
                         </p>
                     )}
+
                     {idol.birth_name && (
                         <p className="text-xs text-slate-500 mt-1">
                             Birth name:{" "}
@@ -52,6 +88,7 @@ export default function IdolDetailPanel({
                             </span>
                         </p>
                     )}
+
                     {idol.group_name && (
                         <p className="text-xs text-slate-400 mt-2">
                             Group:{" "}
@@ -60,6 +97,7 @@ export default function IdolDetailPanel({
                             </span>
                         </p>
                     )}
+
                     {idol.position && (
                         <p className="text-xs text-slate-400">
                             Position:{" "}
@@ -68,12 +106,36 @@ export default function IdolDetailPanel({
                             </span>
                         </p>
                     )}
-                    <div className="flex gap-3 text-xs text-slate-400 mt-1">
+
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 mt-2">
                         {idol.birthdate && (
                             <span>Birth: {idol.birthdate}</span>
                         )}
                         {idol.nationality && (
                             <span>Nationality: {idol.nationality}</span>
+                        )}
+
+                        {/* MBTI badge */}
+                        {mbti && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-slate-600 bg-slate-900/70 text-[11px] font-semibold tracking-wide uppercase">
+                                MBTI&nbsp;
+                                <span className="text-pink-300">
+                                    {mbti}
+                                </span>
+                            </span>
+                        )}
+
+                        {/* Instagram link */}
+                        {instagramLink && instagramHandle && (
+                            <a
+                                href={instagramLink}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-[11px] text-sky-300 hover:text-sky-200 underline underline-offset-2"
+                            >
+                                <span className="i-ph-instagram-logo-duotone" />
+                                @{instagramHandle}
+                            </a>
                         )}
                     </div>
                 </div>

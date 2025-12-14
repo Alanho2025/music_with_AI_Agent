@@ -37,6 +37,7 @@ function IdolForm({
                     </div>
                 )}
             </div>
+
             <div className="space-y-4">
                 {/* 基本欄位 */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -129,7 +130,37 @@ function IdolForm({
                         />
                     </div>
 
-                    {/* Main image URL */}
+                    {/* MBTI */}
+                    <div>
+                        <label className="text-xs text-slate-400">
+                            MBTI
+                        </label>
+                        <input
+                            className="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-slate-100"
+                            placeholder="例如：INTJ"
+                            value={idol.mbti || ""}
+                            onChange={(e) =>
+                                onIdolChange("mbti", e.target.value)
+                            }
+                        />
+                    </div>
+
+                    {/* Instagram */}
+                    <div>
+                        <label className="text-xs text-slate-400">
+                            Instagram
+                        </label>
+                        <input
+                            className="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-xs text-slate-100"
+                            placeholder="@username 或完整網址"
+                            value={idol.instagram || ""}
+                            onChange={(e) =>
+                                onIdolChange("instagram", e.target.value)
+                            }
+                        />
+                    </div>
+
+                    {/* Main image URL + 預覽 */}
                     <div className="md:col-span-2">
                         <label className="text-xs text-slate-400">
                             Main image URL (header)
@@ -140,7 +171,23 @@ function IdolForm({
                             onChange={(e) =>
                                 onIdolChange("image_url", e.target.value)
                             }
+                            placeholder="https://..."
                         />
+
+                        {idol.image_url && (
+                            <div className="mt-2 flex items-center gap-3">
+                                <div className="w-24 h-24 rounded-lg overflow-hidden border border-slate-700 bg-slate-900">
+                                    <img
+                                        src={idol.image_url}
+                                        alt="Main preview"
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <p className="text-[11px] text-slate-500">
+                                    這是 idol detail 上方會用到的主圖預覽。
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -165,6 +212,7 @@ function IdolForm({
                         </p>
                         <button
                             onClick={onAddImage}
+                            type="button"
                             className="px-2 py-1 rounded-full text-[11px] bg-slate-800 text-slate-100 hover:bg-slate-700"
                         >
                             + Add image
@@ -172,18 +220,46 @@ function IdolForm({
                     </div>
 
                     {images.map((img, idx) => (
-                        <div key={img.id ?? idx} className="flex items-center gap-2">
+                        <div
+                            key={img.id ?? idx}
+                            className="flex items-center gap-2"
+                        >
                             <span className="text-[11px] text-slate-500 w-5">
                                 {idx + 1}.
                             </span>
+
+                            {/* 預覽縮圖 */}
+                            {img.image_url ? (
+                                <div className="w-12 h-12 rounded-lg overflow-hidden border border-slate-700 bg-slate-900 flex-shrink-0">
+                                    <img
+                                        src={img.image_url}
+                                        alt={`Preview ${idx + 1}`}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="w-12 h-12 rounded-lg border border-dashed border-slate-700 bg-slate-950 flex-shrink-0 flex items-center justify-center">
+                                    <span className="text-[9px] text-slate-600">
+                                        No img
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* URL 輸入 */}
                             <input
                                 className="flex-1 rounded-lg bg-slate-950 border border-slate-700 px-3 py-1.5 text-[11px] text-slate-100"
                                 placeholder="Image URL"
                                 value={img.image_url || ""}
                                 onChange={(e) =>
-                                    onImageChange(idx, "image_url", e.target.value)
+                                    onImageChange(
+                                        idx,
+                                        "image_url",
+                                        e.target.value
+                                    )
                                 }
                             />
+
+                            {/* sort order */}
                             <input
                                 type="number"
                                 className="w-16 rounded-lg bg-slate-950 border border-slate-700 px-2 py-1.5 text-[11px] text-slate-100"
@@ -196,7 +272,9 @@ function IdolForm({
                                     )
                                 }
                             />
+
                             <button
+                                type="button"
                                 onClick={() => onRemoveImage(idx)}
                                 className="text-[11px] text-red-400 hover:text-red-300"
                             >

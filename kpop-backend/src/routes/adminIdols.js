@@ -62,7 +62,7 @@ router.put("/:id", verifyToken, async (req, res) => {
 
         await client.query("BEGIN");
 
-        // 更新 idol 基本資料
+        // 更新 idol 基本資料，新增 mbti / instagram
         await client.query(
             `UPDATE idols
              SET stage_name = $1,
@@ -72,8 +72,10 @@ router.put("/:id", verifyToken, async (req, res) => {
                  birthdate = $5,
                  nationality = $6,
                  summary = $7,
-                 image_url = $8
-             WHERE id = $9`,
+                 image_url = $8,
+                 MBTI = $9,
+                 instagram = $10
+             WHERE id = $11`,
             [
                 idol.stage_name,
                 idol.birth_name,
@@ -83,11 +85,13 @@ router.put("/:id", verifyToken, async (req, res) => {
                 idol.nationality,
                 idol.summary,
                 idol.image_url || null,
+                idol.mbti || null,
+                idol.instagram || null,
                 id,
             ]
         );
 
-        // 先刪掉舊的圖片，再插入新的（簡單暴力，對你這種 scale 夠用）
+        // 先刪掉舊的圖片，再插入新的（原本就有）
         await client.query("DELETE FROM idol_images WHERE idol_id = $1", [id]);
 
         if (Array.isArray(images)) {
@@ -96,13 +100,12 @@ router.put("/:id", verifyToken, async (req, res) => {
                 await client.query(
                     `INSERT INTO idol_images (idol_id, image_url, sort_order)
                      VALUES ($1, $2, $3)`,
-                    [id, img.image_url, img.sort_order || 1]
+                    [id, img.image_url, img.sort_order ?? 0]
                 );
             }
         }
 
         await client.query("COMMIT");
-
         res.json({ success: true });
     } catch (err) {
         await client.query("ROLLBACK");
@@ -112,4 +115,5 @@ router.put("/:id", verifyToken, async (req, res) => {
         client.release();
     }
 });
+
 module.exports = router;

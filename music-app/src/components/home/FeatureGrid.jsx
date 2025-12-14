@@ -1,13 +1,13 @@
 // src/components/home/FeatureGrid.jsx
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import {useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 
 const FEATURES = [
   {
     title: "Music Library",
     desc: "Search, sort, and play songs with a full player.",
-    to: "/music",
+    to: "/music-player",
     icon: "🎧",
     protected: false,
   },
