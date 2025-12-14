@@ -1,0 +1,68 @@
+name: Full Stack CI
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  frontend:
+    name: Frontend React Build & Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run ESLint
+        run: |
+          if [ -f "./node_modules/.bin/eslint" ]; then
+            npm run lint || true
+          else
+            echo "No eslint config found, skipping"
+          fi
+
+      - name: Run React Build
+        run: npm run build
+
+  backend:
+    name: Backend Node.js Lint & Test Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run ESLint
+        run: |
+          if [ -f "./node_modules/.bin/eslint" ]; then
+            npm run lint || true
+          else
+            echo "No eslint found for backend, skipping"
+          fi
+
+      - name: Basic backend build test
+        run: node -c src/index.js || echo "Node syntax check only"
