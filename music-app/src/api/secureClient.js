@@ -6,7 +6,7 @@ export function useSecureApi() {
   const { token } = useAuth();
 
   const instance = axios.create({
-    baseURL: 'http://localhost:8080/api',
+    baseURL: '/api',
   });
 
   instance.interceptors.request.use((config) => {

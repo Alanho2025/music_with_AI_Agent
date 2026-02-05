@@ -56,10 +56,7 @@ function UrlImportPanel() {
     resetForms();
 
     try {
-      const res = await axios.post(
-        'http://localhost:8080/api/import/group-llm',
-        { sourceUrl: url }
-      );
+      const res = await axios.post('/api/import/group-llm', { sourceUrl: url });
 
       const parsed = res.data.parsed || res.data;
 
@@ -98,7 +95,7 @@ function UrlImportPanel() {
     setMessage(null);
 
     try {
-      await axios.post('http://localhost:8080/api/import/save', {
+      await axios.post('/api/import/save', {
         parsed: {
           group,
           idols,
