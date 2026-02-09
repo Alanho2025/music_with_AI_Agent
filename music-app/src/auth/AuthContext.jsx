@@ -3,6 +3,9 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import keycloak from './keycloak';
 
 const AuthContext = createContext(null);
+// === 固定設定（避免 origin 被算成 localhost / http） ===
+const APP_URL = 'https://music-hub.duckdns.org';
+const CLIENT_ID = 'kpop-frontend';
 
 export function AuthProvider({ children }) {
   const [initialized, setInitialized] = useState(false);
@@ -16,30 +19,29 @@ export function AuthProvider({ children }) {
     keycloak
       .init({
         onLoad: 'check-sso',
-        pkceMethod: 'S256', // 建議打開 PKCE
-        silentCheckSsoRedirectUri:
-          window.location.origin + '/silent-check-sso.html',
+        pkceMethod: 'S256',
+        // 固定成 HTTPS 網域，避免 cache / redirect 混亂
+        silentCheckSsoRedirectUri: `${APP_URL}/silent-check-sso.html`,
       })
       .then(async (auth) => {
         setIsAuthenticated(auth);
 
         if (auth) {
           setToken(keycloak.token);
+
           try {
             const userProfile = await keycloak.loadUserProfile();
             setProfile(userProfile);
           } catch (e) {
             console.error('Failed to load user profile', e);
           }
-          // 這裡從 token 解析 roles
+
+          // 從 token 解析 roles
           const parsed = keycloak.tokenParsed || {};
           const realmRoles = parsed.realm_access?.roles || [];
-          const clientRoles =
-            parsed.resource_access?.['kpop-frontend']?.roles || [];
+          const clientRoles = parsed.resource_access?.[CLIENT_ID]?.roles || [];
 
-          const allRoles = Array.from(
-            new Set([...(realmRoles || []), ...(clientRoles || [])])
-          );
+          const allRoles = Array.from(new Set([...realmRoles, ...clientRoles]));
 
           setRoles(allRoles);
           setIsAdmin(allRoles.includes('admin'));
@@ -71,20 +73,20 @@ export function AuthProvider({ children }) {
     return () => clearInterval(refreshInterval);
   }, []);
 
-  // 一律用 window.location.origin => http://localhost:3000
+  // === 固定 redirectUri，避免跳回 localhost ===
   const login = () =>
     keycloak.login({
-      redirectUri: window.location.origin,
+      redirectUri: `${APP_URL}/`,
     });
 
   const logout = () =>
     keycloak.logout({
-      redirectUri: window.location.origin,
+      redirectUri: `${APP_URL}/`,
     });
 
   const register = () =>
     keycloak.register({
-      redirectUri: window.location.origin,
+      redirectUri: `${APP_URL}/`,
     });
 
   const value = {
