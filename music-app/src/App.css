@@ -36,3 +36,39 @@
     transform: rotate(360deg);
   }
 }
+
+/* 手機 */
+@media (max-width: 600px) {
+  .App-header {
+    min-height: 100vh;
+    padding: 16px;
+    font-size: 16px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .App-logo {
+    height: 30vmin;
+  }
+}
+
+/* 平板 */
+@media (min-width: 601px) and (max-width: 1024px) {
+  .App-header {
+    min-height: 100vh;
+    padding: 32px;
+    font-size: 18px;
+    flex-direction: column;
+    align-items: center;
+  }
+  .App-logo {
+    height: 35vmin;
+  }
+}
+
+/* 桌面 */
+@media (min-width: 1025px) {
+  .App-header {
+    padding: 48px;
+    font-size: 22px;
+  }
+}

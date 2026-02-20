@@ -86,9 +86,9 @@ export default function Home() {
       <ContinueListeningCard />
 
       {/* 🔥 這一塊就是左右推薦區 */}
-      <div className="grid gap-6 xl:grid-cols-2 xl:auto-rows-min">
-        {/* 左邊：佔兩欄，videos 比較寬 */}
-        <div className="xl:col-span-1">
+      <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2">
+        {/* 左邊：videos */}
+        <div>
           <RecommendationsRow
             title="Recommended videos"
             type="video"
